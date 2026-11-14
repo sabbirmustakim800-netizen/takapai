@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-import { q, audit } from './db.js';
+import { q, audit, startFirebasePersistence, flushFirebasePersist, firebasePersistenceEnabled } from './db.js';
 import {
   HttpError,
   nowIso,
@@ -206,7 +206,12 @@ function getSimulatorDevice(merchantId) {
 /* ═══════════════════════════ স্বাস্থ্য ═══════════════════════════ */
 
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, service: 'taka-match', time: nowIso() });
+  res.json({
+    ok: true,
+    service: 'taka-match',
+    storage: firebasePersistenceEnabled() ? 'firebase' : 'local-sqlite',
+    time: nowIso(),
+  });
 });
 
 /* ═══════════════════════════ অ্যাকাউন্ট ═══════════════════════════ */
@@ -847,7 +852,27 @@ setInterval(() => {
 
 /* ═══════════════════════════ স্টার্ট ═══════════════════════════ */
 
+// Firebase ডিফল্ট স্টোরেজ — বুটে রিস্টোর, চলাকালে ব্যাকগ্রাউন্ডে স্ন্যাপশট আপলোড
+startFirebasePersistence();
+
 app.listen(PORT, HOST, () => {
   console.log(`TakaMatch সার্ভার চালু — http://${HOST}:${PORT}`);
   startBackupScheduler();
 });
+
+// Render ডিপ্লয়/রিস্টার্টের আগে শেষ লেখাগুলো Firebase-এ পাঠিয়ে দিই
+let shuttingDown = false;
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  try {
+    await flushFirebasePersist();
+  } catch {
+    /* ignore */
+  }
+  console.log(`[shutdown] ${signal} — শেষ স্ন্যাপশট সেভ হয়েছে`);
+  process.exit(0);
+}
+process.on('SIGTERM', () => void shutdown('SIGTERM'));
+process.on('SIGINT', () => void shutdown('SIGINT'));
+

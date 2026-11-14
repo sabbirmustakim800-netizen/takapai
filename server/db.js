@@ -1,12 +1,38 @@
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { mkdirSync, writeFileSync, rmSync, readFileSync } from 'node:fs';
+import { dirname, resolve, join } from 'node:path';
+import { tmpdir } from 'node:os';
+import crypto from 'node:crypto';
+import { firebaseConfigured, downloadDatabaseSnapshot, uploadDatabaseSnapshot, firebaseStorageSnapshotPath } from './firebase.js';
 
 const DB_FILE = resolve(process.env.DATABASE_FILE || './data/app.db');
 
 mkdirSync(dirname(DB_FILE), { recursive: true });
 
-/** ডিফল্ট ডাটাবেস = নিজের মেশিনের SQLite ফাইল। কোনো ক্লাউড অ্যাকাউন্ট লাগে না। */
+function removeWalSidecars(base) {
+  for (const suffix of ['-wal', '-shm']) {
+    try { rmSync(base + suffix, { force: true }); } catch { /* ignore */ }
+  }
+}
+
+/** ডিফল্ট ডাটাবেস = SQLite। Firebase কনফিগ থাকলে সেটিই ডিফল্ট স্থায়ী স্টোরেজ (বুটে রিস্টোর, চলাকালে সেভ)। */
+if (firebaseConfigured()) {
+  try {
+    const snapshot = await downloadDatabaseSnapshot();
+    if (snapshot && snapshot.subarray(0, 15).toString('utf8') === 'SQLite format 3') {
+      removeWalSidecars(DB_FILE);
+      writeFileSync(DB_FILE, snapshot);
+      console.log(`[db] Firebase স্টোরেজ থেকে ডাটাবেস রিস্টোর হয়েছে (${firebaseStorageSnapshotPath()})`);
+    } else if (snapshot === null) {
+      console.log('[db] Firebase স্টোরেজে কোনো ডাটাবেস স্ন্যাপশট নেই — নতুন ডাটাবেস দিয়ে শুরু হচ্ছে');
+    } else {
+      console.warn('[db] Firebase স্ন্যাপশট সঠিক SQLite ফাইল নয় — লোকাল ডাটাবেস ব্যবহার করা হচ্ছে');
+    }
+  } catch (err) {
+    console.error('[db] Firebase থেকে রিস্টোর ব্যর্থ, লোকাল ডাটাবেস ব্যবহার করা হচ্ছে:', err?.message || err);
+  }
+}
+
 function openDatabase() {
   const handle = new DatabaseSync(DB_FILE);
   handle.exec(`
@@ -177,7 +203,12 @@ db.exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_merchants_api_secret ON merchants(
 
 /** ছোট হেল্পার — prepared statement ক্যাশ করে না, node:sqlite নিজেই দ্রুত */
 export const q = {
-  run: (sql, ...params) => db.prepare(sql).run(...params),
+  run: (sql, ...params) => {
+    const result = db.prepare(sql).run(...params);
+    // Firebase ডিফল্ট স্টোরেজ হলে প্রতিটি লেখার পরে (ডিবাউন্স করে) স্ন্যাপশট আপলোড হয়
+    scheduleFirebasePersist();
+    return result;
+  },
   get: (sql, ...params) => db.prepare(sql).get(...params),
   all: (sql, ...params) => db.prepare(sql).all(...params),
 };
@@ -237,3 +268,71 @@ function cryptoRandomId() {
 }
 
 export const DB_PATH = DB_FILE;
+
+export function firebasePersistenceEnabled() {
+  return firebaseConfigured();
+}
+
+/** কনসিস্টেন্ট স্ন্যাপশট (VACUUM INTO) — WAL/SHM ছাড়াই এক ফাইল */
+export function snapshotBuffer() {
+  const snap = join(tmpdir(), `tm-snap-${process.pid}-${crypto.randomBytes(4).toString('hex')}.db`);
+  const escaped = snap.replace(/'/g, "''");
+  try {
+    db.exec(`VACUUM INTO '${escaped}'`);
+    return readFileSync(snap);
+  } finally {
+    try { rmSync(snap, { force: true }); } catch { /* ignore */ }
+  }
+}
+
+let persistTimer = null;
+let persistInFlight = false;
+let persistPending = false;
+let lastPersistErrorAt = 0;
+
+async function persistNow() {
+  if (!firebaseConfigured()) return false;
+  if (persistInFlight) { persistPending = true; return false; }
+  persistInFlight = true;
+  try {
+    const buf = snapshotBuffer();
+    await uploadDatabaseSnapshot(buf);
+    persistPending = false;
+    return true;
+  } catch (err) {
+    const now = Date.now();
+    if (now - lastPersistErrorAt > 30_000) {
+      lastPersistErrorAt = now;
+      console.error('[firebase] ডাটাবেস সেভ ব্যর্থ:', err?.message || err);
+    }
+    return false;
+  } finally {
+    persistInFlight = false;
+    if (persistPending) { persistPending = false; void persistNow(); }
+  }
+}
+
+/** লেখার পরে ডিবাউন্স করে Firebase-এ সেভ করে (ডিফল্ট স্থায়ী স্টোরেজ) */
+export function scheduleFirebasePersist(delayMs = 3000) {
+  if (!firebaseConfigured()) return;
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    void persistNow();
+  }, delayMs);
+  if (typeof persistTimer.unref === 'function') persistTimer.unref();
+}
+
+export async function flushFirebasePersist() {
+  if (!firebaseConfigured()) return false;
+  if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
+  return persistNow();
+}
+
+export function startFirebasePersistence() {
+  if (!firebaseConfigured()) return;
+  scheduleFirebasePersist(1500);
+  const interval = setInterval(() => { void persistNow(); }, 60_000);
+  if (typeof interval.unref === 'function') interval.unref();
+  console.log(`[firebase] ডিফল্ট স্টোরেজ: Firebase (${firebaseStorageSnapshotPath()})`);
+}
