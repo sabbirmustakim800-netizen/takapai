@@ -26,6 +26,8 @@ const firebaseConfig = {
 };
 
 export function firebaseConfigured() {
+  if (process.env.DISABLE_FIREBASE === '1') return false;
+  if (process.env.NODE_ENV === 'test') return false;
   return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId);
 }
 
