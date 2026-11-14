@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS merchants (
   webhook_secret                  TEXT NOT NULL,
   order_ttl_seconds               INTEGER NOT NULL DEFAULT 1800,
   match_window_before_seconds     INTEGER NOT NULL DEFAULT 300,
+  project_slug                    TEXT,
+  username                        TEXT,
+  api_secret                      TEXT,
   created_at                      TEXT NOT NULL
 );
 
@@ -163,6 +166,14 @@ CREATE TABLE IF NOT EXISTS backup_runs (
 );
 CREATE INDEX IF NOT EXISTS ix_backup_merchant ON backup_runs(merchant_id, created_at DESC);
 `);
+
+// পুরোনো ডাটাবেসে নতুন কলাম যোগ (idempotent)
+try { db.exec('ALTER TABLE merchants ADD COLUMN project_slug TEXT'); } catch {}
+try { db.exec('ALTER TABLE merchants ADD COLUMN username TEXT'); } catch {}
+try { db.exec('ALTER TABLE merchants ADD COLUMN api_secret TEXT'); } catch {}
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_merchants_project_slug ON merchants(project_slug) WHERE project_slug IS NOT NULL');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_merchants_username ON merchants(username) WHERE username IS NOT NULL');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS ux_merchants_api_secret ON merchants(api_secret) WHERE api_secret IS NOT NULL');
 
 /** ছোট হেল্পার — prepared statement ক্যাশ করে না, node:sqlite নিজেই দ্রুত */
 export const q = {

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Dashboard — Takapai</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .pd-wrap{max-width:980px;margin:0 auto;padding:24px 18px 60px}
+    .pd-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+    .grid{display:grid;gap:14px}
+    .k{color:var(--muted);font-size:.9rem}
+    .v{display:block;word-break:break-all;margin-top:4px;font-size:1rem}
+    label{display:grid;gap:4px;color:var(--muted);font-size:.9rem}
+    input{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+    .feed{display:grid;gap:8px;max-height:420px;overflow:auto;margin-top:10px}
+    .ev{border:1px solid var(--line);border-radius:10px;padding:10px;background:rgba(255,255,255,.02)}
+    .row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .badge{font-size:.8rem;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08)}
+    .msg{margin-top:8px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="pd-wrap">
+    <div class="pd-top">
+      <div>
+        <div class="logo"><span class="logo-mark">৳</span> টাকা<b>পাই</b> <span style="color:var(--muted);font-weight:600">/ প্রোজেক্ট ড্যাশবোর্ড</span></div>
+        <p class="k" id="pd-sub">ডিভাইসের মেসেজ রিকুয়েস্ট, পেয়ারিং কী ও API এখান থেকে নিন।</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn ghost small" href="/#setup-server">Setup Your Server</a>
+        <button class="btn ghost small" id="pd-logout" style="display:none">লগআউট</button>
+      </div>
+    </div>
+
+    <div id="pd-login" class="card grid" style="max-width:420px">
+      <h3 style="margin:0">লগইন করুন</h3>
+      <p class="k">এই প্রোজেক্টের ড্যাশবোর্ড দেখতে প্রোজেক্ট নাম, ইউজারনেম ও পাসওয়ার্ড দিন।</p>
+      <form id="pd-login-form" class="grid">
+        <label>প্রোজেক্ট নাম<input name="project_name" id="pd-project" required /></label>
+        <label>ইউজারনেম<input name="username" required /></label>
+        <label>পাসওয়ার্ড<input name="password" type="password" required /></label>
+        <button class="btn primary" type="submit">লগইন</button>
+      </form>
+      <p id="pd-login-msg" class="msg"></p>
+    </div>
+
+    <div id="pd-main" style="display:none" class="grid">
+      <div class="card grid">
+        <h3 style="margin:0">আপনার সার্ভার তথ্য</h3>
+        <div>
+          <div class="k">Get your server address (ডিভাইসের মেসেজ রিকুয়েস্ট এখানে রিসিভ হবে)</div>
+          <code class="v" id="d-addr"></code>
+          <p class="k" style="margin-top:6px">এই লিংকেই আপনার ডিভাইস/অ্যাপ থেকে আসা মেসেজ রিকুয়েস্ট গ্রহণ ও দেখা যাবে।</p>
+        </div>
+        <div>
+          <div class="k">Pairing key (অ্যাপে ব্যবহার করুন — Dashboard-এ সংরক্ষিত)</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+            <code id="d-pair" style="font-size:1.2rem;letter-spacing:1px">—</code>
+            <button class="btn small ghost" id="d-new-pair" type="button">নতুন পেয়ারিং কী তৈরি</button>
+          </div>
+          <p class="k" id="d-pair-exp"></p>
+        </div>
+        <div>
+          <div class="k">API (আপনার নিজস্ব ওয়েবসাইটে পেমেন্ট ভেরিফিকেশনের জন্য)</div>
+          <code class="v" id="d-api"></code>
+          <p class="k" style="margin-top:6px">অর্ডার তৈরি: <code>POST</code> <code id="d-api-post"></code><br/>অর্ডার স্ট্যাটাস: <code>GET</code> <code id="d-api-get"></code><br/>ইভেন্ট/রিকুয়েস্ট: <code>GET</code> <code id="d-api-ev"></code></p>
+          <p class="k" style="margin-top:6px">POST বডি উদাহরণ: <code>{"provider":"bkash","amount":"100","sender":"01712345678","reference":"ORDER-1"}</code></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="align-items:center">
+          <h3 style="margin:0">লাইভ মেসেজ রিকুয়েস্ট (ডিভাইস থেকে)</h3>
+          <div style="display:flex;gap:8px"><span id="d-last" class="k"></span><button class="btn small ghost" id="d-refresh" type="button">রিফ্রেশ</button></div>
+        </div>
+        <p class="k">আপনার ডিভাইস থেকে সার্ভারে আসা SMS/পেমেন্ট রিকুয়েস্ট ও তাদের স্ট্যাটাস।</p>
+        <div id="d-feed" class="feed"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const path = location.pathname.replace(/\/+$/,'');
+  const m = path.match(/\/dashboard\/server\/([^/]+)$/);
+  const projectFromUrl = m ? decodeURIComponent(m[1]) : '';
+  const $ = (s)=>document.querySelector(s);
+  const storeKey = 'takapai_project_session';
+  let session = null; try{ session = JSON.parse(localStorage.getItem(storeKey)||'null'); }catch{}
+  if (projectFromUrl) $('#pd-project').value = projectFromUrl;
+
+  const API_BASE = (typeof window!=='undefined' && window.TAKAPAI_API) ? String(window.TAKAPAI_API).replace(/\/+$/,'') : '';
+
+  async function api(path, opts={}){
+    const headers = {'Content-Type':'application/json', ...(opts.headers||{})};
+    if (session?.token) headers.Authorization = 'Bearer '+session.token;
+    const res = await fetch(API_BASE + path,{...opts,headers});
+    const txt = await res.text(); let data=null; try{data=txt?JSON.parse(txt):null}catch{data={raw:txt}}
+    if(!res.ok) throw new Error(data?.error?.message||data?.message||('HTTP '+res.status));
+    return data;
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]))}
+
+  function render(d){
+    $('#pd-login').style.display='none';
+    $('#pd-main').style.display='grid';
+    $('#pd-logout').style.display='inline-flex';
+    const p = d.project||{};
+    $('#d-addr').textContent = p.server_address || location.origin + '/dashboard/server/' + (p.project_name||'');
+    $('#d-api').textContent = p.api_url || '';
+    $('#d-api-post').textContent = (p.api_url||'') + '/orders';
+    $('#d-api-get').textContent = (p.api_url||'') + '/orders/ORDER_ID';
+    $('#d-api-ev').textContent = (p.api_url||'') + '/events';
+    $('#d-pair').textContent = p.pairing_key || '— (নতুন কী তৈরি করুন)';
+    $('#d-pair-exp').textContent = p.pairing_expires_at ? ('মেয়াদ: '+p.pairing_expires_at) : '';
+    const events = d.events||[];
+    $('#d-last').textContent = 'আপডেট: ' + new Date().toLocaleTimeString('bn-BD');
+    const feed = $('#d-feed');
+    if(!events.length){ feed.innerHTML='<div class="k">এখনো কোনো ডিভাইস মেসেজ রিকুয়েস্ট আসেনি।</div>'; return; }
+    feed.innerHTML = events.map(ev=>`<div class="ev">
+      <div class="row"><b>${esc(ev.provider_label||ev.provider||'')} ${ev.amount?('৳'+esc(ev.amount)):''}</b><span class="badge">${esc(ev.status||'')}</span></div>
+      <div class="k" style="margin-top:4px">TrxID: ${esc(ev.trx_id||'—')} · Sender: ${esc(ev.sender_msisdn||'—')}</div>
+      <div class="k" style="margin-top:2px">সময়: ${esc(ev.ingested_at||'')} ${ev.reason?(' · কারণ: '+esc(ev.reason)) : ''}</div>
+      ${ev.raw_text?`<details style="margin-top:4px"><summary class="k">মূল মেসেজ</summary><div class="k" style="white-space:pre-wrap;margin-top:4px">${esc(ev.raw_text)}</div></details>`:''}
+    </div>`).join('');
+  }
+
+  async function load(){
+    const proj = projectFromUrl || session?.project?.project_name;
+    if(!session?.token || !proj){ $('#pd-login').style.display='grid'; return; }
+    try{ render(await api('/api/server/'+encodeURIComponent(proj)+'/dashboard')); }
+    catch(e){
+      $('#pd-login').style.display='grid'; $('#pd-main').style.display='none'; $('#pd-logout').style.display='none';
+      $('#pd-login-msg').textContent = e.message; $('#pd-login-msg').style.color='var(--danger)';
+      if(/401|403/.test(String(e))){ localStorage.removeItem(storeKey); session=null; }
+    }
+  }
+
+  $('#pd-login-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd=new FormData(e.target); const body=Object.fromEntries(fd.entries());
+    const msg=$('#pd-login-msg'); msg.textContent='অপেক্ষা করুন…'; msg.style.color='var(--muted)';
+    try{
+      const data = await api('/api/server/login',{method:'POST',body:JSON.stringify(body)});
+      session={token:data.token, project:data.project}; localStorage.setItem(storeKey, JSON.stringify(session));
+      if (projectFromUrl && data.project?.project_name && data.project.project_name !== projectFromUrl.toLowerCase()){
+        location.href = '/dashboard/server/' + encodeURIComponent(data.project.project_name); return;
+      }
+      await load();
+    }catch(err){ msg.textContent=err.message; msg.style.color='var(--danger)'; }
+  });
+
+  $('#d-refresh')?.addEventListener('click', load);
+  $('#d-new-pair')?.addEventListener('click', async ()=>{
+    const proj = projectFromUrl || session?.project?.project_name; if(!proj) return;
+    try{ const r = await api('/api/server/'+encodeURIComponent(proj)+'/pairing-key',{method:'POST',body:'{}'}); $('#d-pair').textContent=r.pairing_key||'—'; $('#d-pair-exp').textContent=r.expires_at?('মেয়াদ: '+r.expires_at):''; }
+    catch(e){ alert(e.message); }
+  });
+  $('#pd-logout')?.addEventListener('click', ()=>{ localStorage.removeItem(storeKey); session=null; location.reload(); });
+
+  load();
+  setInterval(()=>{ if(session?.token) load(); }, 10000);
+})();
+</script>
+</body>
+</html>

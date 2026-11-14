@@ -275,3 +275,123 @@ document.addEventListener('DOMContentLoaded', () => {
 
   render();
 });
+
+/* ═══════════ Setup Your Server ═══════════ */
+(function setupServerUI() {
+  const $ = (s) => document.querySelector(s);
+  const regForm = $('#setup-register-form');
+  const loginForm = $('#setup-login-form');
+  if (!regForm || !loginForm) return;
+
+  const tabReg = $('#setup-tab-register');
+  const tabLogin = $('#setup-tab-login');
+  const msg = $('#setup-auth-msg');
+  const result = $('#setup-result');
+  const feedPanel = $('#setup-feed-panel');
+  const feed = $('#setup-feed');
+
+  const storeKey = 'takapai_project_session';
+  let session = null;
+  try { session = JSON.parse(localStorage.getItem(storeKey) || 'null'); } catch {}
+
+  function showTab(which) {
+    const isReg = which === 'reg';
+    regForm.style.display = isReg ? 'grid' : 'none';
+    loginForm.style.display = isReg ? 'none' : 'grid';
+    tabReg.classList.toggle('ghost', !isReg);
+    tabLogin.classList.toggle('ghost', isReg);
+  }
+  tabReg?.addEventListener('click', () => showTab('reg'));
+  tabLogin?.addEventListener('click', () => showTab('login'));
+
+  // ব্যাকএন্ড অন্য ডোমেইনে থাকলে site/config.js-এ window.TAKAPAI_API সেট করা থাকে
+  const API_BASE = (typeof window !== 'undefined' && window.TAKAPAI_API) ? String(window.TAKAPAI_API).replace(/\/+$/, '') : '';
+
+  async function api(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    if (session?.token) headers.Authorization = 'Bearer ' + session.token;
+    const res = await fetch(API_BASE + path, { ...opts, headers });
+    const text = await res.text();
+    let data = null; try { data = text ? JSON.parse(text) : null; } catch { data = { raw: text }; }
+    if (!res.ok) throw new Error(data?.error?.message || data?.message || ('HTTP ' + res.status));
+    return data;
+  }
+
+  function renderProject(p, dash) {
+    result.style.display = 'block';
+    $('#out-server-address').textContent = p.server_address || '';
+    const link = $('#out-server-link'); link.href = p.server_address || '#';
+    const apiUrl = p.api_url || p.api_base || '';
+    $('#out-api-url').textContent = apiUrl;
+    $('#out-api-example').textContent = apiUrl ? (apiUrl + '/orders') : '';
+    const st = $('#out-api-status'); if (st) st.textContent = apiUrl ? (apiUrl + '/orders/[order_id]') : '';
+    if (dash?.project) {
+      $('#out-pairing-key').textContent = dash.project.pairing_key || '— (নতুন কী তৈরি করুন)';
+      $('#out-pairing-exp').textContent = dash.project.pairing_expires_at ? ('মেয়াদ: ' + dash.project.pairing_expires_at) : '';
+    }
+    if (dash?.events) renderFeed(dash.events);
+  }
+
+  function renderFeed(events) {
+    if (!feed) return;
+    feedPanel.style.display = 'block';
+    if (!events || !events.length) { feed.innerHTML = '<div class="meta" style="color:var(--muted)">এখনো কোনো মেসেজ আসেনি। অ্যাপ কানেক্ট হলে এখানে দেখাবে।</div>'; return; }
+    feed.innerHTML = events.slice(0, 30).map(ev => {
+      const amt = ev.amount ? ('৳' + ev.amount) : '';
+      return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;background:rgba(255,255,255,.02)">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${ev.provider_label||ev.provider||''} ${amt}</b><span class="meta" style="color:var(--muted)">${ev.status||''}</span></div>
+        <div class="meta" style="color:var(--muted);margin-top:4px">Trx: ${ev.trx_id||'—'} · From: ${ev.sender_msisdn||'—'} · ${ev.ingested_at||''}</div>
+        ${ev.reason ? `<div class="meta" style="color:var(--warn);margin-top:2px">${ev.reason}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  async function refreshDashboard() {
+    if (!session?.token || !session?.project?.project_name) return;
+    try {
+      const dash = await api(`/api/server/${encodeURIComponent(session.project.project_name)}/dashboard`);
+      renderProject(dash.project, dash);
+      msg.textContent = 'লগইন করা আছে: ' + session.project.project_name;
+      msg.style.color = 'var(--accent)';
+    } catch (e) {
+      if (/401|403/.test(String(e))) { localStorage.removeItem(storeKey); session = null; result.style.display='none'; feedPanel.style.display='none'; }
+      msg.textContent = e.message; msg.style.color = 'var(--danger)';
+    }
+  }
+
+  async function handleAuth(ev, url) {
+    ev.preventDefault();
+    msg.textContent = 'অপেক্ষা করুন…'; msg.style.color = 'var(--muted)';
+    const fd = new FormData(ev.target);
+    const body = Object.fromEntries(fd.entries());
+    try {
+      const data = await api(url, { method: 'POST', body: JSON.stringify(body) });
+      session = { token: data.token, project: data.project };
+      localStorage.setItem(storeKey, JSON.stringify(session));
+      msg.textContent = 'সফল!'; msg.style.color = 'var(--accent)';
+      renderProject(data.project, null);
+      await refreshDashboard();
+    } catch (e) { msg.textContent = e.message; msg.style.color = 'var(--danger)'; }
+  }
+
+  regForm.addEventListener('submit', (e) => handleAuth(e, '/api/server/register'));
+  loginForm.addEventListener('submit', (e) => handleAuth(e, '/api/server/login'));
+
+  $('#btn-new-pairing')?.addEventListener('click', async () => {
+    if (!session?.project?.project_name) return;
+    try {
+      const data = await api(`/api/server/${encodeURIComponent(session.project.project_name)}/pairing-key`, { method: 'POST', body: '{}' });
+      $('#out-pairing-key').textContent = data.pairing_key || '—';
+      $('#out-pairing-exp').textContent = data.expires_at ? ('মেয়াদ: ' + data.expires_at) : '';
+      msg.textContent = 'নতুন পেয়ারিং কী তৈরি হয়েছে'; msg.style.color = 'var(--accent)';
+    } catch (e) { msg.textContent = e.message; msg.style.color = 'var(--danger)'; }
+  });
+  $('#setup-refresh')?.addEventListener('click', refreshDashboard);
+  $('#setup-logout')?.addEventListener('click', () => {
+    localStorage.removeItem(storeKey); session = null;
+    result.style.display='none'; feedPanel.style.display='none';
+    msg.textContent = 'লগআউট হয়েছে'; msg.style.color = 'var(--muted)';
+  });
+
+  if (session?.token) refreshDashboard();
+})();

@@ -46,9 +46,11 @@ import {
   startBackupScheduler,
   PROVIDER_PRESETS,
 } from './backup.js';
+import { mountProjectRoutes } from './project.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(__dirname, '..', 'public');
+const SITE_DIR = join(__dirname, '..', 'site');
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -70,6 +72,18 @@ app.use((req, res, next) => {
       "script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'",
   );
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  next();
+});
+
+/* ─────────────────────────── CORS (পাবলিক প্রোজেক্ট API) ─────────────────────────── */
+// পাবলিক সেটআপ সাইট (takapai.onrender.com) অন্য ডোমেইন থেকে এই API ব্যবহার করে।
+// কুকি ব্যবহার হয় না — সব প্রমাণীকরণ Bearer টোকেন/সিক্রেট কী দিয়ে, তাই Origin সীমিত করার দরকার নেই।
+app.use('/api', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type,authorization,x-device-id,x-device-key');
+  res.setHeader('Access-Control-Max-Age', '600');
+  if (req.method === 'OPTIONS') return res.status(204).end();
   next();
 });
 
@@ -768,9 +782,27 @@ app.post('/api/storage/restore', requireMerchant, apiLimiter, asyncRoute(async (
   }
 }));
 
-/* ═══════════════════════════ স্ট্যাটিক ড্যাশবোর্ড ═══════════════════════════ */
+/* ═══════════════════════════ প্রোজেক্ট / সেটআপ সার্ভার ═══════════════════════════ */
 
-app.use(express.static(PUBLIC_DIR, { maxAge: '1h', index: 'index.html' }));
+mountProjectRoutes(app, {
+  requireMerchant,
+  apiLimiter,
+  registerLimiter,
+  loginLimiter,
+  SITE_DIR,
+  PUBLIC_DIR,
+});
+
+// (direct /api/<tkp_...> রুট server/project.js-এ রেজিস্টার করা হয়)
+
+/* ═══════════════════════════ স্ট্যাটিক ড্যাশবোর্ড ও সাইট ═══════════════════════════ */
+
+// পুরোনো কনসোল ড্যাশবোর্ড
+app.use('/console', express.static(PUBLIC_DIR, { maxAge: '1h', index: 'index.html' }));
+// প্রধান সাইট (Setup Your Server সহ)
+app.use(express.static(SITE_DIR, { maxAge: '1h', index: 'index.html', extensions: ['html'] }));
+// আগের রুট ড্যাশবোর্ডও /app হিসেবে রাখা হলো
+app.use('/app', express.static(PUBLIC_DIR, { maxAge: '1h', index: 'index.html' }));
 
 app.use('/api', (req, res) => {
   res.status(404).json({ error: { code: 'not_found', message: 'এই API নেই' } });

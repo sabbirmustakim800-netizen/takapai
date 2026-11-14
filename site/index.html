@@ -40,6 +40,7 @@
     <div class="logo"><span class="logo-mark">৳</span> টাকা<b>পাই</b></div>
     <div class="nav-links">
       <a href="#start">শুরু</a>
+      <a href="#setup-server"><b>Setup Your Server</b></a>
       <a href="#install">অ্যাপ ইনস্টল</a>
       <a href="#server">সার্ভার লোকেশন</a>
       <a href="#key">API কী</a>
@@ -397,6 +398,74 @@ PORT=3000 npm start
   </div>
 </section>
 
+
+<!-- ═══════════ SETUP YOUR SERVER ═══════════ -->
+<section id="setup-server" class="wrap">
+  <h2>Setup Your Server</h2>
+  <p class="lead">নিজের প্রোজেক্ট তৈরি করুন — লগইন করলেই পাবেন সার্ভার অ্যাড্রেস, পেয়ারিং কী এবং পেমেন্ট ভেরিফিকেশনের API কী।</p>
+
+  <div class="setup-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:18px;align-items:start">
+    <div class="card panel" id="setup-auth-card" style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px">
+      <div class="tabs" style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn small" id="setup-tab-register" type="button">নতুন প্রোজেক্ট</button>
+        <button class="btn small ghost" id="setup-tab-login" type="button">লগইন</button>
+      </div>
+
+      <form id="setup-register-form" class="stack" style="display:grid;gap:10px">
+        <label style="display:grid;gap:4px;font-size:.9rem;color:var(--muted)">প্রোজেক্ট নাম<input name="project_name" required placeholder="যেমন: myshop" pattern="[a-zA-Z0-9-]{3,40}" style="padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)" /></label>
+        <label style="display:grid;gap:4px;font-size:.9rem;color:var(--muted)">ইউজারনেম<input name="username" required placeholder="username" style="padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)" /></label>
+        <label style="display:grid;gap:4px;font-size:.9rem;color:var(--muted)">পাসওয়ার্ড<input name="password" type="password" required minlength="6" placeholder="কমপক্ষে ৬ অক্ষর" style="padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)" /></label>
+        <button class="btn primary" type="submit">প্রোজেক্ট তৈরি ও লগইন</button>
+        <p class="meta">প্রোজেক্ট নামই আপনার ড্যাশবোর্ড লিংকের অংশ হবে: <code>/dashboard/server/[project_name]</code></p>
+      </form>
+
+      <form id="setup-login-form" class="stack" style="display:none;gap:10px">
+        <label style="display:grid;gap:4px;font-size:.9rem;color:var(--muted)">প্রোজেক্ট নাম<input name="project_name" required placeholder="myshop" style="padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)" /></label>
+        <label style="display:grid;gap:4px;font-size:.9rem;color:var(--muted)">ইউজারনেম<input name="username" required placeholder="username" style="padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)" /></label>
+        <label style="display:grid;gap:4px;font-size:.9rem;color:var(--muted)">পাসওয়ার্ড<input name="password" type="password" required style="padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)" /></label>
+        <button class="btn primary" type="submit">লগইন করুন</button>
+      </form>
+
+      <p id="setup-auth-msg" class="meta" style="margin-top:10px;color:var(--muted)"></p>
+    </div>
+
+    <div class="card panel" id="setup-result" style="display:none;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px">
+      <h3 style="margin-top:0">আপনার সার্ভার রেডি</h3>
+      <div class="stack" style="display:grid;gap:14px">
+        <div>
+          <div class="meta" style="color:var(--muted)">Get your server address — ডিভাইসের মেসেজ রিকুয়েস্ট এখানে রিসিভ হবে</div>
+          <code id="out-server-address" style="display:block;word-break:break-all;margin-top:6px"></code>
+          <div style="margin-top:8px"><a id="out-server-link" class="btn small" href="#" target="_blank" rel="noopener">ড্যাশবোর্ড খুলুন</a></div>
+        </div>
+        <div>
+          <div class="meta" style="color:var(--muted)">Pairing key (অ্যাপে দিন — Dashboard-এও থাকবে)</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+            <code id="out-pairing-key" style="font-size:1.15rem;letter-spacing:1px">—</code>
+            <button class="btn small ghost" id="btn-new-pairing" type="button">নতুন কী তৈরি করুন</button>
+          </div>
+          <p class="meta" id="out-pairing-exp" style="margin-top:4px;color:var(--muted)"></p>
+        </div>
+        <div>
+          <div class="meta" style="color:var(--muted)">API — আপনার ওয়েবসাইটে পেমেন্ট ভেরিফিকেশনের জন্য ব্যবহার করুন</div>
+          <code id="out-api-url" style="display:block;word-break:break-all;margin-top:6px"></code>
+          <p class="meta" style="margin-top:6px;color:var(--muted)">অর্ডার তৈরি (POST): <code id="out-api-example"></code><br/>স্ট্যাটাস (GET): <code id="out-api-status"></code></p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ghost small" id="setup-refresh" type="button">রিফ্রেশ / লাইভ ফিড</button>
+          <button class="btn ghost small" id="setup-logout" type="button">লগআউট</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card panel" id="setup-feed-panel" style="display:none;margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px">
+    <h3 style="margin-top:0">লাইভ মেসেজ রিকুয়েস্ট (ডিভাইস থেকে)</h3>
+    <p class="meta" style="color:var(--muted)">আপনার ফোন/অ্যাপ থেকে আসা SMS পেমেন্ট ইভেন্ট এখানে দেখা যাবে।</p>
+    <div id="setup-feed" style="margin-top:10px;display:grid;gap:8px;max-height:360px;overflow:auto"></div>
+  </div>
+</section>
+
+
 <!-- ═══════════ FAQ ═══════════ -->
 <section id="faq" class="wrap">
   <h2>সাধারণ প্রশ্ন</h2>
@@ -476,6 +545,7 @@ PORT=3000 npm start
   <p style="margin-top:6px">একই TrxID একবারই — এই নিয়মটি ইচ্ছাকৃত।</p>
 </footer>
 
+<script src="./config.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>

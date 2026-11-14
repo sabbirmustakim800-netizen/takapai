@@ -5,7 +5,7 @@
   "description": "bKash / Rocket / Nagad SMS payment verification gateway",
   "type": "module",
   "engines": {
-    "node": ">=22.5.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "start": "node server/index.js",
