@@ -25,6 +25,17 @@ export function normalizeUsername(input) {
   return u;
 }
 
+/**
+ * পাবলিক সাইট ও API আলাদা ডোমেইনে থাকতে পারে (Render static site + web service)।
+ * ব্রাউজার থেকে আসা অনুরোধে Origin হেডার থাকলে ব্যবহারকারীর দেখা সাইট-ঠিকানাই লিংকে বসাই,
+ * নাহলে সার্ভারের নিজের ঠিকানা।
+ */
+function publicBase(req) {
+  const origin = req.get('origin');
+  if (origin && /^https?:\/\/[^/]+$/i.test(origin)) return origin.replace(/\/+$/, '');
+  return `${req.protocol}://${req.get('host')}`;
+}
+
 function ensureApiSecret(merchant) {
   if (merchant.api_secret) return merchant.api_secret;
   const secret = `tkp_${newToken(24)}`;
@@ -33,7 +44,7 @@ function ensureApiSecret(merchant) {
 }
 
 export function projectView(merchant, req) {
-  const host = `${req.protocol}://${req.get('host')}`;
+  const host = publicBase(req);
   const slug = merchant.project_slug;
   const apiSecret = merchant.api_secret;
   const apiBase = apiSecret ? `${host}/api/${apiSecret}` : null;
@@ -133,7 +144,7 @@ export function projectDashboardData(req, res) {
   const m = q.get('SELECT * FROM merchants WHERE id = ?', req.merchant.id);
   ensureApiSecret(m);
   const fresh = q.get('SELECT * FROM merchants WHERE id = ?', m.id);
-  const host = `${req.protocol}://${req.get('host')}`;
+  const host = publicBase(req);
   const slug = fresh.project_slug;
 
   const events = q.all(
@@ -212,7 +223,7 @@ function orderViewRow(row) {
 
 export function mountProjectApi(app, apiLimiter) {
   const infoHandler = (req, res) => {
-    const host = `${req.protocol}://${req.get('host')}`;
+    const host = publicBase(req);
     res.json({ ok: true, project: req.merchant.project_slug, api_base: `${host}/api/${req.params.secret}`, endpoints: { orders: `${host}/api/${req.params.secret}/orders`, events: `${host}/api/${req.params.secret}/events` } });
   };
 
