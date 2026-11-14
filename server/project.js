@@ -58,6 +58,9 @@ export function projectView(merchant, req) {
     username: merchant.username,
     business_name: merchant.business_name,
     server_address: slug ? `${host}/dashboard/server/${encodeURIComponent(slug)}` : null,
+    // অ্যাপে বসানোর ঠিকানা — পেয়ারিং ও SMS আপলোড এই হোস্টেই হয় (সাইটের ড্যাশবোর্ড লিংক নয়)
+    app_server_address: apiHostBase(req),
+    pair_endpoint: `${apiHostBase(req)}/api/devices/pair`,
     api_base: apiBase,
     api_url: apiBase,
     pairing_hint: 'ড্যাশবোর্ড থেকে পেয়ারিং কোড তৈরি করে অ্যাপে দিন — অ্যাপটি আপনার ডিভাইসের মেসেজ এই সার্ভারে পাঠাবে।',
@@ -189,6 +192,8 @@ export function projectDashboardData(req, res) {
       username: fresh.username,
       business_name: fresh.business_name,
       server_address: `${host}/dashboard/server/${encodeURIComponent(slug)}`,
+      app_server_address: apiHostBase(req),
+      pair_endpoint: `${apiHostBase(req)}/api/devices/pair`,
       pairing_key: pairing ? pairing.code : null,
       pairing_expires_at: pairing ? pairing.expires_at : null,
       api_key: fresh.api_secret,

@@ -160,7 +160,11 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val server = etServer.text.toString().trim().trimEnd('/')
+        // কেউ ড্যাশবোর্ড লিংক পেস্ট করলেও শুধু হোস্টটুকু নেওয়া হয়,
+        // কারণ /api/... শুধু API সার্ভারেই থাকে (পাথ থাকলে বাদ যায়)।
+        val raw = etServer.text.toString().trim()
+        val server = Regex("^(https?://[^/]+)", RegexOption.IGNORE_CASE)
+            .find(raw)?.groupValues?.get(1) ?: raw.trimEnd('/')
         val code = etCode.text.toString().trim().uppercase()
 
         if (server.isEmpty()) {
@@ -201,8 +205,20 @@ class MainActivity : AppCompatActivity() {
                 val stream = if (statusCode in 200..299) conn.inputStream else conn.errorStream
                 val response = stream?.bufferedReader()?.use { it.readText() } ?: ""
 
+                val json = if (statusCode in 200..299) {
+                    try { JSONObject(response) } catch (e: Exception) { null }
+                } else null
+
                 if (statusCode in 200..299) {
-                    val credentials = JSONObject(response).getJSONObject("credentials")
+                    // static সাইট ২০০ ফেরত দিলেও বডি খালি হয় — তখন API-র ঠিকানা ভুল
+                    if (json == null || !json.has("credentials")) {
+                        runOnUiThread {
+                            tvStatus.text = getString(R.string.pair_failed)
+                            toast(getString(R.string.pair_no_api, server))
+                        }
+                        return@execute
+                    }
+                    val credentials = json.getJSONObject("credentials")
                     store.serverUrl = server
                     store.deviceId = credentials.getString("device_id")
                     store.deviceKey = credentials.getString("device_key")

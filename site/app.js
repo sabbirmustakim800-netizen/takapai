@@ -321,6 +321,13 @@ document.addEventListener('DOMContentLoaded', () => {
     result.style.display = 'block';
     $('#out-server-address').textContent = p.server_address || '';
     const link = $('#out-server-link'); link.href = p.server_address || '#';
+    const appServer = p.app_server_address || API_BASE || '';
+    const appEl = $('#out-app-server');
+    if (appEl) appEl.textContent = appServer;
+    $('#btn-copy-app-server')?.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(appServer); $('#btn-copy-app-server').textContent = 'কপি হয়েছে ✓'; setTimeout(() => { $('#btn-copy-app-server').textContent = 'কপি'; }, 1600); }
+      catch { $('#out-app-server').scrollIntoView({ block: 'center' }); }
+    });
     const apiUrl = p.api_url || p.api_base || '';
     $('#out-api-url').textContent = apiUrl;
     $('#out-api-example').textContent = apiUrl ? (apiUrl + '/orders') : '';

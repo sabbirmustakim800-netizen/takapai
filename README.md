@@ -1,7 +1,8 @@
 # টাকা<span>ম্যাচ</span> (TakaMatch) — bKash / Rocket / Nagad পেমেন্ট ভেরিফিকেশন
 
 > 🚀 **লাইভ সাইট:** https://takapai.onrender.com — *Setup Your Server*, প্রোজেক্ট ড্যাশবোর্ড, পেয়ারিং কী ও API।
-> **API সার্ভার:** https://takapai-api.onrender.com · **প্রোজেক্ট ড্যাশবোর্ড:** `https://takapai.onrender.com/dashboard/server/<project_name>`
+> **API + ড্যাশবোর্ড (একই হোস্ট):** https://takapai-api.onrender.com · `https://takapai-api.onrender.com/dashboard/server/<project_name>`
+> **অ্যাপে দেওয়ার সার্ভার ঠিকানা:** `https://takapai-api.onrender.com` — ড্যাশবোর্ডের লিংক নয় (নিচে দেখুন)
 
 > 💾 **ডাটাবেস:** ডিফল্টে SQLite (`data/app.db`)। `FIREBASE_*` কনফিগ থাকলে **Firebase (Firestore) ডিফল্ট স্থায়ী স্টোরেজ** —
 > সার্ভার রিস্টার্ট/রিডিপ্লয়েও প্রোজেক্ট, ডিভাইস ও অর্ডার টিকে থাকে (নিচে *Firebase স্টোরেজ* দেখুন)।
@@ -57,7 +58,8 @@ node scripts/smoke.mjs http://127.0.0.1:3000   # ২৮টি এন্ড-ট�
 | কী | কোথায় কাজে লাগে |
 |---|---|
 | **Server address** — `https://takapai.onrender.com/dashboard/server/<project_name>` | ডিভাইস থেকে আসা মেসেজ রিকুয়েস্ট, অর্ডার ও ইভেন্ট দেখার লাইভ ড্যাশবোর্ড |
-| **Pairing key** — ৮ অক্ষর, ২৪ ঘণ্টা (`/api/devices/pair`) | Android অ্যাপে বসিয়ে ফোনকে প্রোজেক্টের সাথে জোড়া দেওয়া |
+| **App-এ সার্ভার ঠিকানা** — `https://takapai-api.onrender.com` | অ্যাপের “সার্ভার” ঘরে **ঠিক এটাই** বসাতে হয়; পেয়ারিং `POST /api/devices/pair` এই হোস্টেই আছে |
+| **Pairing key** — ৮ অক্ষর, ২৪ ঘণ্টা | Android অ্যাপে বসিয়ে ফোনকে প্রোজেক্টের সাথে জোড়া দেওয়া |
 | **API** — `https://takapai-api.onrender.com/api/tkp_<secret>` | নিজের ওয়েবসাইট/অ্যাপে পেমেন্ট ভেরিফিকেশন |
 
 নিজের সাইটে ব্যবহার:
@@ -73,6 +75,11 @@ const { order } = await res.json();          // order.id দিয়ে স্�
 
 const s = await fetch(`https://takapai-api.onrender.com/api/tkp_<secret>/orders/${order.id}`);
 ```
+
+> ⚠️ **অ্যাপে ড্যাশবোর্ডের লিংক দিলে পেয়ারিং হবে না।** `takapai.onrender.com` একটা static সাইট — সে API সার্ভ করতে
+> পারে না (অচেনা POST-এ খালি ২০০ ফেরত দেয়), তাই অ্যাপ “সংযোগ ব্যর্থ” দেখায়। অ্যাপে সবসময়
+> `https://takapai-api.onrender.com` (API হোস্ট) দিন। নতুন অ্যাপ ভার্সনে ড্যাশবোর্ড লিংক পেস্ট করলেও
+> শুধু হোস্টটুকু নিয়ে নেয়, আর ভুল হোস্টে স্পষ্ট বার্তা দেখায়।
 
 `api_secret` শুধু লগইন করা অবস্থায় দেখা যায়, প্রতিটি প্রোজেক্টের জন্য আলাদা, আর যেকোনো সময় নতুন করে তৈরি করা যায়।
 টোকেন/সিক্রেট কোনো ফাইলে বা রিপোতে রাখা হয় না — হোস্টিংয়ের Environment/Secrets-এ রাখুন (`.env.example`-এ শুধু নাম)।

@@ -16,6 +16,7 @@
     <string name="status_connecting">সংযুক্ত হচ্ছে…</string>
     <string name="pair_success">ডিভাইস সংযুক্ত হয়েছে ✓</string>
     <string name="pair_failed">সংযোগ ব্যর্থ</string>
+    <string name="pair_no_api">এই ঠিকানায় ( %1$s ) পেয়ারিং API নেই। অ্যাপের সার্ভার ঘরে API সার্ভারের ঠিকানা দিন — ড্যাশবোর্ডের লিংক নয়।</string>
     <string name="network_error">নেটওয়ার্ক ত্রুটি</string>
     <string name="sms_already_granted">এসএমএস অনুমতি আগেই দেওয়া আছে</string>
     <string name="notification_settings_missing">নোটিফিকেশন সেটিংস খোলা যায়নি</string>

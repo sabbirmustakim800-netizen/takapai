@@ -58,6 +58,11 @@
           <p class="k" style="margin-top:6px">এই লিংকেই আপনার ডিভাইস/অ্যাপ থেকে আসা মেসেজ রিকুয়েস্ট গ্রহণ ও দেখা যাবে।</p>
         </div>
         <div>
+          <div class="k">📱 অ্যাপে দেওয়ার সার্ভার ঠিকানা (পেয়ারিং এখানেই হয়)</div>
+          <code class="v" id="d-app"></code>
+          <p class="k" style="margin-top:6px">অ্যাপের “সার্ভার” ঘরে ঠিক এই ঠিকানাটিই বসান — উপরের ড্যাশবোর্ড লিংক নয়।</p>
+        </div>
+        <div>
           <div class="k">Pairing key (অ্যাপে ব্যবহার করুন — Dashboard-এ সংরক্ষিত)</div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
             <code id="d-pair" style="font-size:1.2rem;letter-spacing:1px">—</code>
@@ -112,6 +117,7 @@
     $('#pd-logout').style.display='inline-flex';
     const p = d.project||{};
     $('#d-addr').textContent = p.server_address || location.origin + '/dashboard/server/' + (p.project_name||'');
+    $('#d-app').textContent = p.app_server_address || '';
     $('#d-api').textContent = p.api_url || '';
     $('#d-api-post').textContent = (p.api_url||'') + '/orders';
     $('#d-api-get').textContent = (p.api_url||'') + '/orders/ORDER_ID';
