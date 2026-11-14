@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Takapai (টাকাপাই) — বিকাশ, রকেট, নগদ পেমেন্ট অটো ভেরিফিকেশন</title>
+<meta name="description" content="Takapai — ফোনে আসা বিকাশ (16247), রকেট (16216), নগদ (16167) এর পেমেন্ট SMS পড়ে গ্রাহকের অর্ডার স্বয়ংক্রিয়ভাবে যাচাই করে। একটি TrxID একবারই গ্রহণযোগ্য। Android অ্যাপ + সার্ভার + ওয়েবহুক, সম্পূর্ণ গাইড ও ডাউনলোড।" />
+<meta name="keywords" content="টাকাপাই, Takapai, বিকাশ পেমেন্ট যাচাই, bKash verification, Nagad auto payment, Rocket payment SMS, বাংলাদেশ পেমেন্ট গেটওয়ে, TrxID যাচাই" />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#070b14" />
+<link rel="canonical" href="https://site-b5937f6077b54a7295ad12475d346532.freebuff.page/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Takapai — বিকাশ / রকেট / নগদ অটো পেমেন্ট ভেরিফিকেশন" />
+<meta property="og:description" content="ফোনের SMS থেকেই পেমেন্ট যাচাই। Android অ্যাপ + সার্ভার + ওয়েবহুক। এক ট্রাঞ্জেকশন একবারই।" />
+<meta property="og:url" content="https://site-b5937f6077b54a7295ad12475d346532.freebuff.page/" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="stylesheet" href="./styles.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Crect width='108' height='108' rx='24' fill='%230B1220'/%3E%3Ccircle cx='54' cy='54' r='26' fill='%232EE6A8'/%3E%3Cpath d='M42 54l8 8 16-18' stroke='%2304211A' stroke-width='7' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Takapai",
+  "alternateName": "টাকাপাই",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Android 7.0+",
+  "description": "বিকাশ, রকেট ও নগদ পেমেন্ট SMS পড়ে গ্রাহকের অর্ডার স্বয়ংক্রিয়ভাবে যাচাই করার সিস্টেম।",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BDT" },
+  "inLanguage": "bn"
+}
+</script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo"><span class="logo-mark">৳</span> টাকা<b>পাই</b></div>
+    <div class="nav-links">
+      <a href="#start">শুরু</a>
+      <a href="#install">অ্যাপ ইনস্টল</a>
+      <a href="#server">সার্ভার লোকেশন</a>
+      <a href="#key">API কী</a>
+      <a href="#code">ইন্টিগ্রেশন</a>
+      <a href="#config">কনফিগারেশন</a>
+      <a href="#database">ব্যাকআপ</a>
+      <a href="#faq">প্রশ্ন</a>
+    </div>
+    <a class="btn primary small" href="#download">ডাউনলোড</a>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <h1>বিকাশ, রকেট, নগদ —<br /><span>টাকা পেলেই নিজে থেকেই যাচাই।</span></h1>
+  <p class="sub">
+    আপনার ফোনে আসা পেমেন্ট SMS পড়ে গ্রাহকের অর্ডারের সাথে মিলিয়ে দেখে,
+    মিললেই আপনার ওয়েবসাইটে বা অ্যাপে ইনস্ট্যান্ট সিগন্যাল পাঠায়।
+    একই TrxID দিয়ে দ্বিতীয়বার টাকা নেওয়া অসম্ভব।
+  </p>
+  <div class="hero-actions">
+    <a class="btn primary" href="#download">⬇ APK ডাউনলোড</a>
+    <a class="btn" href="#start">শুরু থেকে শেষ দেখা</a>
+  </div>
+  <div class="badges">
+    <span class="badge bkash">বিকাশ 16247</span>
+    <span class="badge rocket">রকেট 16216</span>
+    <span class="badge nagad">নগদ 16167</span>
+  </div>
+</header>
+
+<!-- ═══════════ এক নজরে ═══════════ -->
+<section id="start" class="wrap">
+  <h2>পুরো সিস্টেমটা আসলে কেমন</h2>
+  <p class="lead">তিনটি টুকরো, তিনটি আলাদা কাজ। এটা বুঝলে বাকি সব সহজ হয়ে যায়।</p>
+
+  <div class="grid two">
+    <div class="card accent">
+      <h3>১️⃣ Android অ্যাপ — শুধু “চোখ”</h3>
+      <p>
+        আপনার ফোনে ইনস্টল হয়। বিকাশ/রকেট/নগদ থেকে আসা <b>SMS পড়ে সার্ভারে পাঠায়</b>।
+        আর কিছু নয় — কোনো হিসাব এখানে হয় না।
+        <b>এই কারণেই অ্যাপে “সার্ভার লোকেশন” দিতে হয়</b> — কোথায় পাঠাবে সেটা অ্যাপকে জানাতে হবে।
+      </p>
+    </div>
+    <div class="card">
+      <h3>২️⃣ সার্ভার — আসল “মস্তিষ্ক”</h3>
+      <p>
+        Node.js অ্যাপ। গ্রাহকের অর্ডার রাখে, SMS-এর সাথে মেলায় (টাকা + নম্বর + TrxID),
+        আর এক-বার নিয়ম মানে। ডাটাবেস এখানেই থাকে।
+      </p>
+    </div>
+    <div class="card">
+      <h3>৩️⃣ আপনার ওয়েবসাইট/অ্যাপ — “হাত”</h3>
+      <p>
+        অর্ডার তৈরি করে সার্ভারে পাঠায় (API), আর ম্যাচ হলে সার্ভার আপনার webhook-এ খবর দেয়।
+        তখন আপনি পণ্য বা সার্ভিস ডেলিভারি দেন।
+      </p>
+    </div>
+  </div>
+
+  <div style="margin-top:22px" class="card">
+    <h3>টাকা যাওয়ার পথ</h3>
+    <pre><code>গ্রাহক বিকাশে ১০০ টাকা পাঠাল  ──►  আপনার ফোনে SMS (16247)
+                                        │  অ্যাপ পড়ে পাঠায়
+                                        ▼
+                              আপনার সার্ভার  ──►  অর্ডারের সাথে মিলল?
+                                        │
+                    ┌───────────────────┴───────────────────┐
+                 হ্যাঁ                                      না
+                    │                                      │
+        webhook: payment.matched                    pending / unmatched
+                    │
+                    ▼
+        আপনার সাইট “পেমেন্ট সফল” দেখায়, পণ্য ডেলিভারি হয়</code></pre>
+  </div>
+</section>
+
+<!-- ═══════════ ইনস্টল ═══════════ -->
+<section id="install" class="wrap">
+  <h2>অ্যাপ ইনস্টল — শুরু থেকে শেষ</h2>
+  <p class="lead">প্রথমবার করতে ৫ মিনিট লাগে। ধাপগুলো ঠিক এভাবে অনুসরণ করুন।</p>
+
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">১</span>
+      <div class="body">
+        <h4>APK ডাউনলোড করুন</h4>
+        <p>নিচের <a href="#download">ডাউনলোড</a> বাটন থেকে <code>takapai-reader-1.0.0.apk</code> নামান (৩.৫ MB)।</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">২</span>
+      <div class="body">
+        <h4>“Unknown sources” চালু করুন</h4>
+        <p>Settings → Apps → (আপনার ব্রাউজার / ফাইল ম্যানেজার) → <b>Install unknown apps</b> → Allow।
+        Android 7-এ: Settings → Security → Unknown sources।</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">৩</span>
+      <div class="body">
+        <h4>Play Protect বন্ধ করুন</h4>
+        <p>Play Store → প্রোফাইল → Play Protect → ⚙️ Settings → <b>Scan apps with Play Protect</b> বন্ধ করুন।
+        নাহলে “unsafe app blocked” দেখিয়ে ইনস্টল আটকে দেবে।
+        <span class="note" style="display:block;margin-top:8px">ইনস্টল শেষ হলে Play Protect আবার চালু করে দিতে পারেন — অ্যাপ চলতে কোনো সমস্যা হবে না।</span></p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">৪</span>
+      <div class="body">
+        <h4>ইনস্টল করে খুলুন</h4>
+        <p>ফাইলটি ট্যাপ করে Install → Open।</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">৫</span>
+      <div class="body">
+        <h4>SMS অনুমতি দিন (বাধ্যতামূলক)</h4>
+        <p>অ্যাপ খোলার সঙ্গে সঙ্গে পপ-আপ আসবে — <b>Allow</b> চাপুন।
+        অনুমতি না দিলে অ্যাপে ঢোকাই যাবে না (গেট স্ক্রিন পুরোটা ঢেকে রাখবে)।
+        পপ-আপ না এলে → <b>“সেটিংসে গিয়ে অনুমতি দিন”</b> → Permissions → SMS → Allow।</p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">৬</span>
+      <div class="body">
+        <h4>সার্ভারের ঠিকানা ও পেয়ারিং কোড দিন</h4>
+        <p>
+          অ্যাপে <b>সার্ভার লোকেশন</b> লিখুন (দেখুন <a href="#server">সার্ভার লোকেশন</a>)।
+          তারপর ড্যাশবোর্ড → ডিভাইস → <b>পেয়ারিং কোড তৈরি</b> → ৮ অক্ষরের কোডটি অ্যাপে বসিয়ে
+          <b>ডিভাইস সংযুক্ত করুন</b>। এই মুহূর্তে অ্যাপটি নিজের <b>ইউনিক ডিভাইস কী</b> পায়।
+        </p>
+      </div>
+    </div>
+    <div class="step">
+      <span class="step-num">৭</span>
+      <div class="body">
+        <h4>ফোনটি চালু রাখুন</h4>
+        <p>Settings → Battery → Battery optimization → <b>টাকাপাই</b> → Don’t optimize।
+        নাহলে ব্যাকগ্রাউন্ডে অ্যাপ বন্ধ হয়ে SMS আটকে যেতে পারে।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ সার্ভার লোকেশন ═══════════ -->
+<section id="server" class="wrap">
+  <h2>“সার্ভার লোকেশন” কী, কেন লাগে</h2>
+  <p class="lead">
+    অ্যাপটি শুধু SMS পড়ে। সেই SMS কোথায় পাঠাবে — সেটাই সার্ভারের ঠিকানা।
+    আপনার নিজের সার্ভার আপনি নিজেই চালাবেন, তাই অ্যাপকে সেটি বলে দিতে হয়।
+  </p>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>🏠 নিজের কম্পিউটারে (পরীক্ষার জন্য)</h3>
+      <p>
+        <code>npm start</code> চালানোর পর কম্পিউটারের লোকাল IP দিন —
+        যেমন <code>http://192.168.0.5:3000</code>।
+        ফোন ও কম্পিউটার <b>একই WiFi</b>-তে থাকতে হবে। শেষে <code>/</code> দেবেন না।
+      </p>
+    </div>
+    <div class="card">
+      <h3>☁️ অনলাইনে (সবসময়ের জন্য)</h3>
+      <p>
+        সার্ভারটি Render / VPS-এ চালালে যে ঠিকানা পাবেন সেটাই দিন —
+        যেমন <code>https://takapai-api.onrender.com</code>।
+        <b>HTTPS বাধ্যতামূলক</b>, নাহলে ডিভাইস কী প্লেইনটেক্সটে যায়।
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>সার্ভার চালু করবেন যেভাবে</h3>
+    <pre><code>git clone &lt;আপনার রিপো&gt; takapai &amp;&amp; cd takapai
+npm install
+PORT=3000 npm start
+
+# তখন টার্মিনালে দেখবেন:
+# Takapai সার্ভার চালু — http://0.0.0.0:3000</code></pre>
+    <p style="margin-top:10px">
+      যে কম্পিউটারে এটি চলছে, সেটার ঠিকানাই অ্যাপে দিতে হবে।
+      ড্যাশবোর্ড একই সার্ভারেই চলে — ব্রাউজারে <code>http://192.168.0.5:3000</code> খুললেই পাবেন।
+    </p>
+  </div>
+
+  <div class="note danger" style="margin-top:16px">
+    <b>নিরাপত্তা:</b> ফোন আর সার্ভারের মাঝের নেটওয়ার্ক যেন বিশ্বাসযোগ্য হয়। পাবলিক WiFi-তে
+    <code>http://</code> ব্যবহার করবেন না — সর্বদা <code>https://</code>।
+  </div>
+</section>
+
+<!-- ═══════════ API কী ═══════════ -->
+<section id="key" class="wrap">
+  <h2>API কী কোথায় পাবেন</h2>
+  <p class="lead">দুটি আলাদা চাবি — দুটোর কাজ আলাদা। গুলিয়ে ফেলবেন না।</p>
+
+  <table>
+    <tr><th>চাবি</th><th>কোথায় পাবেন</th><th>কী কাজে</th></tr>
+    <tr>
+      <td><b>ডিভাইস কী</b><br /><code>dvk_…</code></td>
+      <td>ড্যাশবোর্ড → ডিভাইস → <b>পেয়ারিং কোড</b> → অ্যাপে বসালে অ্যাপ নিজেই পায়।
+        (অথবা ড্যাশবোর্ড → ডিভাইস → <b>কী তৈরি করুন</b> — একবারই দেখায়)</td>
+      <td>ফোন থেকে <code>/api/ingest</code>-এ SMS পাঠাতে। অ্যাপ নিজেই ব্যবহার করে।</td>
+    </tr>
+    <tr>
+      <td><b>মার্চেন্ট টোকেন</b><br /><code>ses_…</code></td>
+      <td>ড্যাশবোর্ডে লগইন করলেই ব্রাউজারে সেভ হয়।
+        সার্ভার থেকে নিতে: <code>POST /api/auth/login</code></td>
+      <td>আপনার ওয়েবসাইট/অ্যাপ থেকে অর্ডার তৈরি করতে (<code>/api/orders</code>)।</td>
+    </tr>
+    <tr>
+      <td><b>webhook সিক্রেট</b><br /><code>whsec_…</code></td>
+      <td>ড্যাশবোর্ড → সেটিংস → webhook সিক্রেট</td>
+      <td>সার্ভার থেকে আসা webhook সত্যি কি না যাচাই করতে।</td>
+    </tr>
+  </table>
+
+  <div class="note" style="margin-top:16px">
+    মার্চেন্ট টোকেন <b>কখনো</b> ব্রাউজারের জাভাস্ক্রিপ্টে বা মোবাইল অ্যাপে বসাবেন না।
+    টোকেন আপনার সার্ভারে থাকবে, ব্রাউজার আপনার সার্ভারকেই কল করবে।
+  </div>
+</section>
+
+<!-- ═══════════ ইন্টিগ্রেশন ═══════════ -->
+<section id="code" class="wrap">
+  <h2>আপনার ওয়েবসাইট বা অ্যাপে লাগাবেন যেভাবে</h2>
+  <p class="lead">
+    নিচে আপনার সার্ভারের ঠিকানা বসান — সব কোড নিজে থেকেই বদলে যাবে।
+    তারপর Copy করে নিজের প্রজেক্টে বসিয়ে দিন।
+  </p>
+
+  <div class="config">
+    <label>আপনার সার্ভার লোকেশন
+      <input id="cfgServer" placeholder="https://takapai-api.onrender.com" value="" />
+    </label>
+    <label>ডিভাইস আইডি (ঐচ্ছিক — টেস্ট curl-এর জন্য)
+      <input id="cfgDevice" placeholder="dev_xxxxxxxxxxxx" value="" />
+    </label>
+  </div>
+
+  <div class="card">
+    <div class="code-head">
+      <div class="tabs" id="codeTabs">
+        <button class="tab active" data-tab="php-order">PHP · অর্ডার</button>
+        <button class="tab" data-tab="php-hook">PHP · webhook</button>
+        <button class="tab" data-tab="node">Node.js</button>
+        <button class="tab" data-tab="python">Python</button>
+        <button class="tab" data-tab="curl">cURL (টেস্ট)</button>
+        <button class="tab" data-tab="html">HTML বাটন</button>
+      </div>
+      <button class="copy" data-copy="php-order">কপি</button>
+    </div>
+
+    <pre id="snippet"><code id="snippetCode"></code></pre>
+  </div>
+
+  <div class="grid two" style="margin-top:16px">
+    <div class="card">
+      <h3>ম্যাচ হওয়ার পর webhook যা পাবে</h3>
+      <pre><code>{
+  "event": "payment.matched",
+  "order": {
+    "id": "ord_…",
+    "reference": "ORDER-1024",
+    "provider": "bkash",
+    "amount": "100.00",
+    "trx_id": "AB12CD34EF"
+  },
+  "payment": {
+    "sender_msisdn": "01712345678",
+    "received_at": "2026-11-14T10:00:00.000Z"
+  }
+}</code></pre>
+    </div>
+    <div class="card">
+      <h3>অবশ্যই মেনে চলুন</h3>
+      <p>
+        • <b>সিগনেচার যাচাই করুন</b> — নাহলে যে কেউ ভুয়া “পেমেন্ট হয়েছে” পাঠাতে পারবে।<br />
+        • <b>reference</b> দিয়ে নিজের অর্ডার খুঁজুন।<br />
+        • webhook ডুপ্লিকেট আসতে পারে — <code>order.id</code> দিয়ে একবারই ডেলিভারি দিন।<br />
+        • ২ সেকেন্ডের মধ্যে <code>200</code> ফেরত দিন, ভারী কাজ পরে করুন।
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ কনফিগারেশন ═══════════ -->
+<section id="config" class="wrap">
+  <h2>কনফিগারেশন — কোনটা কী করে</h2>
+  <p class="lead">ড্যাশবোর্ড → সেটিংস থেকে বদলানো যায়।</p>
+
+  <table>
+    <tr><th>সেটিং</th><th>কাজ</th><th>সুপারিশ</th></tr>
+    <tr><td>webhook URL</td><td>ম্যাচ হলে এই ঠিকানায় POST যাবে</td><td>আপনার সাইটের <code>/payment-hook</code></td></tr>
+    <tr><td>অর্ডারের মেয়াদ</td><td>কতক্ষণ টাকার অপেক্ষা করবে</td><td>১৮০০ সেকেন্ড (৩০ মিনিট)</td></tr>
+    <tr><td>আগে-পরে সহনশীলতা</td><td>গ্রাহক আগে টাকা দিয়ে পরে অর্ডার দিলে কত সেকেন্ড পেছনে দেখবে</td><td>৩০০ সেকেন্ড</td></tr>
+  </table>
+
+  <div class="note" style="margin-top:16px">
+    <b>TrxID পুরো সিস্টেমে একবারই।</b> একটি বাস্তব পেমেন্ট একবার যাচাই হলে আর কোনো অর্ডারে
+    ব্যবহার করা যাবে না — এমনকি অন্য অ্যাকাউন্টেও নয়। এটাই স্ক্রিনশট জালিয়াতি বন্ধ করে।
+  </div>
+</section>
+
+<!-- ═══════════ ডাটাবেস ও ব্যাকআপ ═══════════ -->
+<section id="database" class="wrap">
+  <h2>ডাটাবেস কোথায় থাকে — ক্লাউড লাগে না</h2>
+  <p class="lead">
+    ডিফল্ট ডাটাবেস আপনার নিজের মেশিনেই (একটি SQLite ফাইল)। কোনো ক্লাউড অ্যাকাউন্ট, মাসিক বিল বা
+    লক-ইন নেই। চাইলে নিজের ক্লাউড স্পেস যোগ করে ব্যাকআপ রাখতে পারেন।
+  </p>
+
+  <table>
+    <tr><th>কী</th><th>কোথায় থাকে</th><th>খরচ</th></tr>
+    <tr><td>ডিফল্ট ডাটাবেস</td><td><code>data/app.db</code> — যে মেশিনে সার্ভার চলছে</td><td>শূন্য</td></tr>
+    <tr><td>নিজের ক্লাউড ব্যাকআপ</td><td>Cloudflare R2 / Amazon S3 / Backblaze B2 / MinIO — আপনার নিজের অ্যাকাউন্ট</td><td>সাধারণত ১০ GB ফ্রি</td></tr>
+  </table>
+
+  <div class="note" style="margin-top:16px">
+    <b>ব্যাকআপ এনক্রিপ্টেড।</b> প্রতিটি ব্যাকআপ AES-256-GCM দিয়ে লক করা হয় — বাকেটের চাবি
+    কারো হাতে চলে গেলেও পাসওয়ার্ড হ্যাশ বা webhook সিক্রেট পড়া যাবে না।
+  </div>
+
+  <h3 style="margin-top:24px">ব্যাকআপ চালু করবেন যেভাবে</h3>
+  <ol>
+    <li>R2/S3/B2-এ একটি বাকেট বানিয়ে <b>Access Key ID</b> ও <b>Secret Key</b> নিন।</li>
+    <li>ড্যাশবোর্ড → <b>ব্যাকআপ</b> ট্যাবে Endpoint, Bucket, Access Key বসান।</li>
+    <li><b>সংযোগ পরীক্ষা</b> চাপুন — সব ঠিক থাকলে “সংযোগ ঠিক আছে ✓” দেখাবে।</li>
+    <li><b>সংরক্ষণ করুন</b>। এরপর <b>এখনই ব্যাকআপ</b> চাপলেই প্রথম কপি যাবে।</li>
+    <li>স্বয়ংক্রিয় ব্যাকআপ (মিনিট) — যেমন <code>60</code> দিলে প্রতি ঘণ্টায় নিজে থেকেই যাবে।</li>
+  </ol>
+  <p class="meta">
+    ভুল কিছু হলে <b>ফিরিয়ে আনুন</b> বাটনে চাপলেই ওই সময়ের ডাটা ফিরে আসে; আগের অবস্থাটি
+    <code>app.db.pre-restore-*</code> নামে সুরক্ষিত থাকে।
+  </p>
+</section>
+
+<!-- ═══════════ ডাউনলোড ═══════════ -->
+<section id="download" class="wrap">
+  <div class="download-card">
+    <div style="flex:1;min-width:260px">
+      <h2 style="font-size:1.3rem">টাকাপাই রিডার — Android অ্যাপ</h2>
+      <p style="color:var(--muted);margin-top:6px">
+        ফোনে ইনস্টল করে SMS অনুমতি দিলেই কাজ শুরু।
+      </p>
+      <p class="meta" style="margin-top:10px">
+        Android 7.0+ · ৩.৫ MB · সংস্করণ 1.0.0 · কোনো ট্র্যাকিং নেই
+      </p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn primary" href="./takapai-reader-1.0.0.apk" download>⬇ APK ডাউনলোড</a>
+      <a class="btn ghost" href="#install">ইনস্টল গাইড</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FAQ ═══════════ -->
+<section id="faq" class="wrap">
+  <h2>সাধারণ প্রশ্ন</h2>
+
+  <details>
+    <summary>গুগলে “takapai” লিখলে কীভাবে আসবে?</summary>
+    <p>
+      এই সাইটটি পাবলিক ও সার্চ-ইঞ্জিনের জন্য খোলা (<code>robots.txt</code> + <code>sitemap.xml</code> আছে)।
+      তবু গুগল নিজে থেকে ঠিক সময়ে ইনডেক্স করে না — দ্রুত করতে
+      <a href="https://search.google.com/search-console" target="_blank" rel="noopener">Google Search Console</a>-এ
+      সাইটটি যোগ করে <b>URL Inspection → Request Indexing</b> চাপুন।
+      নতুন সাইটে সাধারণত কয়েক দিন থেকে কয়েক সপ্তাহ লাগে।
+      দ্রুত ও নিশ্চিত ফল পেতে <code>takapai</code> নামে নিজের ডোমেইন (যেমন takapai.com) নিয়ে
+      সাইটটি সেখানে পয়েন্ট করাই সর্বোত্তম।
+    </p>
+  </details>
+
+  <details>
+    <summary>নিজের ক্লাউড ডাটাবেস (Postgres/MySQL) অ্যাড করা যাবে?</summary>
+    <p>
+      সার্ভারটি নিজের ডাটাবেস হিসেবে <b>SQLite</b> ব্যবহার করে — অর্থাৎ ডাটা আপনার নিজের মেশিনেই থাকে,
+      কোনো ক্লাউড ডাটাবেস সার্ভিসের উপর নির্ভরতা নেই। ক্লাউডে ডাটা রাখতে চাইলে <b>ব্যাকআপ</b> ট্যাব থেকে
+      নিজের R2/S3/B2/MinIO বাকেট যোগ করুন — ব্যাকআপ স্বয়ংক্রিয়ভাবে ক্লাউডে যাবে এবং যেকোনো সময় ফিরিয়ে আনা যাবে।
+      সরাসরি Postgres/MySQL ড্রাইভার এখনো নেই; সেটি চাইলে জানান।
+    </p>
+  </details>
+
+  <details>
+    <summary>সাবডোমেইন নিজের পছন্দমতো (takapai.xxx) নিতে পারব?</summary>
+    <p>
+      Freebuff Sites-এ সাবডোমেইন স্বয়ংক্রিয়ভাবে তৈরি হয়। নিজের নাম চাইলে
+      একটি ডোমেইন কিনে সেটি এই সাইটে পয়েন্ট করতে হবে — তখন <code>takapai.example.com</code> ঠিকানায় সাইট চলবে।
+    </p>
+  </details>
+
+  <details>
+    <summary>অ্যাপে বারবার “সংযোগ ব্যর্থ” আসছে কেন?</summary>
+    <p>
+      তিনটি কারণ সাধারণত: (১) সার্ভারের ঠিকানা ভুল বা শেষে <code>/</code> আছে, (২) ফোন ও সার্ভার একই নেটওয়ার্কে নেই,
+      (৩) সার্ভার <code>http://</code> আর ফোন <code>https://</code> আশা করছে। ড্যাশবোর্ড ব্রাউজারে খুলে
+      নিশ্চিত করুন ঠিকানা ঠিক আছে, তারপর হুবহু সেটাই অ্যাপে দিন।
+    </p>
+  </details>
+
+  <details>
+    <summary>পেমেন্ট হচ্ছে কিন্তু ম্যাচ হচ্ছে না</summary>
+    <p>
+      চারটি জিনিস মিলতে হয়: <b>প্রোভাইডার</b>, <b>হুবহু টাকা</b>, <b>প্রেরকের নম্বর</b>, আর অর্ডারটি
+      <b>pending</b> থাকতে হবে। ড্যাশবোর্ড → লাইভ ফিডে দেখুন SMS এসেছে কি না, আর কোন কারণে বাদ পড়েছে
+      (<code>not_incoming_payment</code>, <code>amount_not_found</code> ইত্যাদি)।
+    </p>
+  </details>
+
+  <details>
+    <summary>আমার নিজের ক্লাউড ডাটাবেস ব্যবহার করা যাবে?</summary>
+    <p>
+      বর্তমানে সার্ভারটি SQLite ফাইলে ডেটা রাখে (<code>DATABASE_FILE</code> এনভায়রনমেন্ট ভ্যারিয়েবল দিয়ে
+      পাথ বদলানো যায় — মাউন্ট করা ক্লাউড ভলিউমও দেওয়া যায়)। Postgres/MySQL-এর মতো
+      বাইরের ডাটাবেসে সরাসরি সাপোর্ট এখনো যোগ হয়নি — সেটি পরবর্তী ধাপ।
+    </p>
+  </details>
+
+  <details>
+    <summary>এই সাইটের সাথে ফোনের অ্যাপটা কীভাবে যুক্ত?</summary>
+    <p>
+      অ্যাপকে শুধু “আপনার সার্ভারের ঠিকানা” জানাতে হয়, তারপর পেয়ারিং কোড দিয়ে নিজের ইউনিক কী নেয়।
+      এরপর প্রতিটি মেসেজ ওই সার্ভারেই যায়। কোনো মাঝখানের কোম্পানি নেই — সম্পূর্ণ আপনার নিয়ন্ত্রণে।
+    </p>
+  </details>
+</section>
+
+<footer class="wrap">
+  <p><b>টাকাপাই</b> — বিকাশ / রকেট / নগদ পেমেন্ট যাচাই।</p>
+  <p style="margin-top:6px">
+    অ্যাপটি শুধু আপনার নিজের ব্যবসার সিমে চলা ফোনে ব্যবহার করুন। অন্যের এসএমএস পড়া আইনত অপরাধ।
+  </p>
+  <p style="margin-top:6px">একই TrxID একবারই — এই নিয়মটি ইচ্ছাকৃত।</p>
+</footer>
+
+<script src="./app.js"></script>
+</body>
+</html>

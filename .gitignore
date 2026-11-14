@@ -1,0 +1,21 @@
+node_modules/
+data/
+.env
+*.log
+.DS_Store
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/.kotlin/
+
+# ★ সাইনিং কী ও পাসওয়ার্ড — কখনো কমিট করবেন না
+android/keystore.properties
+android/*.keystore
+android/*.jks
+release.keystore
+*.keystore
+*.jks

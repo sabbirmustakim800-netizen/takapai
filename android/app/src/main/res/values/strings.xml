@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">টাকাম্যাচ রিডার</string>
+    <string name="notification_service_label">পেমেন্ট নোটিফিকেশন পড়া</string>
+
+    <string name="heading">পেমেন্ট রিডার</string>
+    <string name="intro">এই ফোনে আসা বিকাশ (16247), রকেট (16216) ও নগদ (16167) এর পেমেন্ট এসএমএস স্বয়ংক্রিয়ভাবে সার্ভারে যাবে এবং গ্রাহকের ট্রাঞ্জেকশনের সাথে মিলিয়ে দেখা হবে।</string>
+
+    <string name="server_hint">সার্ভারের ঠিকানা (যেমন https://pay.example.com)</string>
+    <string name="code_hint">পেয়ারিং কোড (৮ অক্ষর)</string>
+    <string name="pair_button">ডিভাইস সংযুক্ত করুন</string>
+    <string name="sms_button">এসএমএস অনুমতি দিন</string>
+    <string name="notif_button">নোটিফিকেশন অ্যাক্সেস চালু করুন</string>
+    <string name="sync_button">এখনই পাঠান</string>
+
+    <string name="status_connecting">সংযুক্ত হচ্ছে…</string>
+    <string name="pair_success">ডিভাইস সংযুক্ত হয়েছে ✓</string>
+    <string name="pair_failed">সংযোগ ব্যর্থ</string>
+    <string name="network_error">নেটওয়ার্ক ত্রুটি</string>
+    <string name="sms_already_granted">এসএমএস অনুমতি আগেই দেওয়া আছে</string>
+    <string name="notification_settings_missing">নোটিফিকেশন সেটিংস খোলা যায়নি</string>
+    <string name="pair_first">আগে ডিভাইস সংযুক্ত করুন</string>
+    <string name="sync_queued">পাঠানোর কাজ শুরু হয়েছে</string>
+
+    <string name="status_paired">সংযুক্ত ✓\n\nডিভাইস আইডি: %1$s\nসার্ভার: %2$s\nঅপেক্ষমাণ ইভেন্ট: %3$s\nসর্বশেষ পাঠানো: %4$s</string>
+    <string name="status_unpaired">এখনো সংযুক্ত নয়।\nড্যাশবোর্ড → ডিভাইস → পেয়ারিং কোড নিন, তারপর এখানে বসান।\n\nঅপেক্ষমাণ ইভেন্ট: %1$s</string>
+    <string name="never">কখনো নয়</string>
+    <string name="just_now">এইমাত্র</string>
+
+    <!-- ─────── পারমিশন গেট ─────── -->
+    <string name="gate_title">অনুমতি ছাড়া অ্যাপ চলবে না</string>
+    <string name="gate_body">বিকাশ, রকেট ও নগদ থেকে আসা পেমেন্ট এসএমএস পড়ার অনুমতি দিলেই অ্যাপটি চালু হবে।\n\nঅনুমতি না দিলে কোনো এসএমএস সার্ভারে যাবে না, ট্রাঞ্জেকশনও যাচাই হবে না।</string>
+    <string name="gate_icon">🔒</string>
+    <string name="gate_grant">এসএমএস পড়ার অনুমতি দিন</string>
+    <string name="gate_notif">নোটিফিকেশন অ্যাক্সেস চালু করুন</string>
+    <string name="gate_settings">সেটিংসে গিয়ে অনুমতি দিন</string>
+    <string name="gate_hint">পপ-আপ না এলে উপরের \"সেটিংসে গিয়ে অনুমতি দিন\" চাপুন → Permissions → SMS → Allow।</string>
+    <string name="gate_granted">অনুমতি পাওয়া গেছে ✓</string>
+
+    <string name="notif_hint">নোটিফিকেশন অ্যাক্সেস ঐচ্ছিক — এসএমএস সবসময় যথেষ্ট। অ্যাপের পুশ নোটিফিকেশনও ধরতে চাইলে এটি চালু করুন।</string>
+</resources>

@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TakaMatch — পেমেন্ট ভেরিফিকেশন কনসোল</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<!-- ══════════════ লগইন / রেজিস্টার ══════════════ -->
+<section id="auth-screen" class="auth-screen">
+  <div class="auth-art">
+    <div class="brand-mark">৳</div>
+    <h1>টাকা<span>ম্যাচ</span></h1>
+    <p class="tagline">
+      বিকাশ, রকেট ও নগদের পেমেন্ট এসএমএস স্বয়ংক্রিয়ভাবে যাচাই করুন।
+      মিললেই আপনার সিস্টেমে ইনস্ট্যান্ট webhook — আর একই TrxID দ্বিতীয়বার কখনো কাজ করবে না।
+    </p>
+    <ul class="feature-list">
+      <li><b>16247 / 16216 / 16167</b> — তিনটি প্রোভাইডার আলাদা আলাদা শনাক্ত</li>
+      <li><b>ইউনিক ডিভাইস কী</b> — প্রতিটি ইনস্টলের জন্য আলাদা API key</li>
+      <li><b>এক-বার নিয়ম</b> — একটি TrxID চিরকালীনভাবে একবারই ব্যবহৃত</li>
+      <li><b>স্বাক্ষরিত webhook</b> — HMAC-SHA256 দিয়ে সুরক্ষিত</li>
+    </ul>
+    <div class="auth-badges">
+      <span class="badge bkash">বিকাশ</span>
+      <span class="badge rocket">রকেট</span>
+      <span class="badge nagad">নগদ</span>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <div class="tabs">
+      <button class="tab active" data-auth-tab="login">লগইন</button>
+      <button class="tab" data-auth-tab="register">নতুন অ্যাকাউন্ট</button>
+    </div>
+
+    <form id="login-form" class="form" autocomplete="on">
+      <label>ইমেইল<input type="email" name="email" required placeholder="you@business.com" /></label>
+      <label>পাসওয়ার্ড<input type="password" name="password" required placeholder="••••••••" /></label>
+      <button class="btn primary" type="submit">লগইন করুন</button>
+      <p class="hint">নতুন ব্যবহারকারী? উপরের ট্যাব থেকে অ্যাকাউন্ট খুলুন।</p>
+    </form>
+
+    <form id="register-form" class="form" hidden>
+      <label>ব্যবসার নাম<input type="text" name="business_name" required minlength="2" placeholder="যেমন: রহিম ডিজিটাল স্টোর" /></label>
+      <label>ইমেইল<input type="email" name="email" required placeholder="you@business.com" /></label>
+      <label>পাসওয়ার্ড<input type="password" name="password" required minlength="8" placeholder="কমপক্ষে ৮ অক্ষর" /></label>
+      <button class="btn primary" type="submit">অ্যাকাউন্ট খুলুন</button>
+    </form>
+  </div>
+</section>
+
+<!-- ══════════════ মূল অ্যাপ ══════════════ -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark small">৳</span>
+      <span class="brand-name">টাকা<b>ম্যাচ</b></span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-view="dashboard">ড্যাশবোর্ড</button>
+      <button class="nav-btn" data-view="orders">অর্ডার</button>
+      <button class="nav-btn" data-view="devices">ডিভাইস</button>
+      <button class="nav-btn" data-view="feed">লাইভ ফিড</button>
+      <button class="nav-btn" data-view="settings">সেটিংস</button>
+      <button class="nav-btn" data-view="backup">ব্যাকআপ</button>
+    </nav>
+    <div class="topbar-right">
+      <span id="biz-name" class="biz-name"></span>
+      <button id="logout-btn" class="btn ghost small">লগআউট</button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ───── ড্যাশবোর্ড ───── -->
+    <section class="view" id="view-dashboard">
+      <div class="view-head">
+        <h2>সারসংক্ষেপ</h2>
+        <button class="btn ghost small" data-refresh>রিফ্রেশ</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-label">পেন্ডিং অর্ডার</span>
+          <strong id="stat-pending" class="stat-value">—</strong>
+          <span class="stat-foot">টাকা পাওয়ার অপেক্ষায়</span>
+        </div>
+        <div class="stat accent">
+          <span class="stat-label">আজকের ম্যাচ</span>
+          <strong id="stat-today-count" class="stat-value">—</strong>
+          <span class="stat-foot">আজকের সফল যাচাই</span>
+        </div>
+        <div class="stat accent">
+          <span class="stat-label">আজকের সংগ্রহ</span>
+          <strong id="stat-today-amount" class="stat-value">৳—</strong>
+          <span class="stat-foot">ম্যাচ হওয়া মোট টাকা</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">সক্রিয় ডিভাইস</span>
+          <strong id="stat-devices" class="stat-value">—</strong>
+          <span class="stat-foot">এসএমএস পাঠাচ্ছে</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>সাম্প্রতিক সফল ম্যাচ</h3>
+          <span class="muted" id="stat-total"></span>
+        </div>
+        <div id="recent-matches" class="match-list"></div>
+      </div>
+
+      <div class="panel tip">
+        <h3>কীভাবে কাজ করে</h3>
+        <ol class="steps">
+          <li><b>ডিভাইস যোগ করুন</b> — ডিভাইস ট্যাব থেকে পেয়ারিং কোড নিন, অ্যাপে বসান। ওই ইনস্টল নিজের ইউনিক কী পাবে।</li>
+          <li><b>অর্ডার সাবমিট করুন</b> — গ্রাহকের প্রোভাইডার, টাকা, নম্বর ও TrxID দিন।</li>
+          <li><b>এসএমএস মিললেই</b> — webhook যাবে, অর্ডার <code>matched</code> হবে, ওই TrxID চিরতরে লক।</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ───── অর্ডার ───── -->
+    <section class="view" id="view-orders" hidden>
+      <div class="split">
+        <div class="panel form-panel">
+          <h3>নতুন ট্রাঞ্জেকশন যাচাই</h3>
+          <form id="order-form" class="form">
+            <label>প্রোভাইডার
+              <select name="provider" required>
+                <option value="bkash">বিকাশ (bKash)</option>
+                <option value="rocket">রকেট (Rocket)</option>
+                <option value="nagad">নগদ (Nagad)</option>
+              </select>
+            </label>
+            <label>টাকার পরিমাণ<input name="amount" required inputmode="decimal" placeholder="500" /></label>
+            <label>প্রেরকের নম্বর<input name="sender" required inputmode="tel" placeholder="01712345678" /></label>
+            <label>TrxID <span class="muted">(ঐচ্ছিক)</span><input name="trx_id" placeholder="AB12CD34EF" /></label>
+            <label>আপনার রেফারেন্স <span class="muted">(ঐচ্ছিক)</span><input name="reference" placeholder="ORDER-1024" /></label>
+            <button class="btn primary" type="submit">যাচাই শুরু করুন</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>অর্ডার তালিকা</h3>
+            <select id="order-filter" class="mini-select">
+              <option value="">সব</option>
+              <option value="pending">পেন্ডিং</option>
+              <option value="matched">ম্যাচড</option>
+              <option value="expired">মেয়াদোত্তীর্ণ</option>
+              <option value="cancelled">বাতিল</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr><th>সময়</th><th>প্রোভাইডার</th><th>টাকা</th><th>প্রেরক</th><th>TrxID</th><th>স্ট্যাটাস</th></tr>
+              </thead>
+              <tbody id="orders-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── ডিভাইস ───── -->
+    <section class="view" id="view-devices" hidden>
+      <div class="split">
+        <div class="panel">
+          <h3>নতুন ডিভাইস পেয়ার করুন</h3>
+          <p class="muted small-text">
+            কোড তৈরি করে Android অ্যাপে বসান। অ্যাপটি ওই মুহূর্তে নিজের
+            <b>ইউনিক ডিভাইস আইডি ও API কী</b> পাবে — যা শুধু ওই ইনস্টলের।
+          </p>
+          <form id="pair-form" class="form">
+            <label>ডিভাইসের নাম<input name="label" placeholder="কাউন্টারের ফোন" /></label>
+            <button class="btn primary" type="submit">পেয়ারিং কোড তৈরি করুন</button>
+          </form>
+          <div id="pair-output" class="code-box" hidden>
+            <span class="muted">এই কোডটি অ্যাপে দিন (১৫ মিনিট বৈধ)</span>
+            <div class="code" id="pair-code">—</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>ডিভাইস তালিকা</h3>
+          <div id="device-list" class="device-list"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>ম্যানুয়াল API কী</h3>
+        <p class="muted small-text">পেয়ারিং ছাড়া নিজের সার্ভার/স্ক্রিপ্ট থেকে পাঠাতে চাইলে সরাসরি কী তৈরি করুন।</p>
+        <form id="device-form" class="inline-form">
+          <input name="label" placeholder="ডিভাইসের নাম" />
+          <button class="btn" type="submit">কী তৈরি করুন</button>
+        </form>
+        <div id="key-output" class="code-box" hidden>
+          <p class="warn">⚠ এই কী আর কখনো দেখানো হবে না — এখনই সংরক্ষণ করুন।</p>
+          <span class="muted">Device ID</span>
+          <div class="code" id="key-device">—</div>
+          <span class="muted">Device Key</span>
+          <div class="code" id="key-secret">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── লাইভ ফিড ───── -->
+    <section class="view" id="view-feed" hidden>
+      <div class="view-head">
+        <h2>লাইভ এসএমএস ফিড</h2>
+        <button class="btn ghost small" data-refresh>রিফ্রেশ</button>
+      </div>
+
+      <div class="panel">
+        <h3>টেস্ট সিমুলেটর</h3>
+        <p class="muted small-text">ফোন ছাড়াই যাচাই করুন। এখানকার মেসেজও একই পাইপলাইনে যায়, তাই এক-বার নিয়মও প্রযোজ্য।</p>
+        <form id="sim-form" class="form sim-form">
+          <div class="row">
+            <label>প্রেরক
+              <select name="sender">
+                <option value="16247">16247 (বিকাশ)</option>
+                <option value="16216">16216 (রকেট)</option>
+                <option value="16167">16167 (নগদ)</option>
+                <option value="bKash">bKash</option>
+                <option value="Rocket">Rocket</option>
+                <option value="Nagad">Nagad</option>
+              </select>
+            </label>
+            <label>সাবমিট বাটন
+              <span class="muted small-text">ড্রাই-রান করলে কিছুই সেভ হবে না</span>
+              <span class="btn-row">
+                <button class="btn ghost" type="button" id="sim-dry">শুধু পার্স করুন</button>
+                <button class="btn primary" type="submit">সিমুলেট করুন</button>
+              </span>
+            </label>
+          </div>
+          <label>মেসেজ
+            <textarea name="text" rows="3" required>You have received Tk 500.00 from 01712345678. Fee Tk 0.00. Balance Tk 1,200.00. TrxID AB12CD34EF at 12/11/2026 10:30. Download bKash app to enjoy more.</textarea>
+          </label>
+        </form>
+        <pre id="sim-result" class="sim-result" hidden></pre>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>সর্বশেষ ইভেন্ট</h3></div>
+        <div id="feed-list" class="feed-list"></div>
+      </div>
+    </section>
+
+    <!-- ───── সেটিংস ───── -->
+    <section class="view" id="view-settings" hidden>
+      <div class="split">
+        <div class="panel">
+          <h3>যাচাইয়ের নিয়ম</h3>
+          <form id="settings-form" class="form">
+            <label>ওয়েবহুক URL <span class="muted">(ম্যাচ হলে এখানে POST যাবে)</span>
+              <input name="webhook_url" placeholder="https://yoursite.com/api/payment-hook" />
+            </label>
+            <label>অর্ডারের মেয়াদ (সেকেন্ড)<input name="order_ttl_seconds" inputmode="numeric" /></label>
+            <label>আগে-পরে সহনশীলতা (সেকেন্ড)<input name="match_window_before_seconds" inputmode="numeric" /></label>
+            <button class="btn primary" type="submit">সংরক্ষণ করুন</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h3>webhook সিক্রেট</h3>
+          <p class="muted small-text">
+            প্রতিটি webhook-এ <code>X-Signature: sha256=…</code> হেডার থাকে।
+            সেটি যাচাই করুন এই সিক্রেট দিয়ে — নাহলে যে কেউ ভুয়া "পেমেন্ট হয়েছে" পাঠাতে পারে।
+          </p>
+          <div class="code" id="webhook-secret">—</div>
+          <button id="rotate-secret" class="btn ghost small">সিক্রেট রোটেট করুন</button>
+
+          <h3 class="mt">যাচাই করার নমুনা</h3>
+          <pre class="sim-result">const expected = 'sha256=' + crypto
+  .createHmac('sha256', process.env.WEBHOOK_SECRET)
+  .update(rawBody)
+  .digest('hex');
+if (expected !== req.headers['x-signature']) return res.sendStatus(401);</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───── ব্যাকআপ ───── -->
+    <section class="view" id="view-backup" hidden>
+      <div class="view-head">
+        <h2>ডাটাবেস ও ক্লাউড ব্যাকআপ</h2>
+        <button class="btn ghost small" id="backup-now">এখনই ব্যাকআপ</button>
+      </div>
+
+      <div class="panel">
+        <h3>চলমান ডাটাবেস</h3>
+        <p class="muted small-text">
+          ডিফল্ট ডাটাবেস আপনার নিজের মেশিনেই থাকে — কোনো ক্লাউড অ্যাকাউন্ট বা মাসিক বিল লাগে না।
+          চাইলে নিচে <b>নিজের ক্লাউড স্টোরেজ</b> যোগ করে ব্যাকআপ রাখতে পারেন, আর যেকোনো সময় ফিরিয়ে আনতে পারেন।
+        </p>
+        <div id="db-info" class="device-list"></div>
+      </div>
+
+      <div class="split">
+        <div class="panel">
+          <h3>নিজের ক্লাউড স্টোরেজ</h3>
+          <form id="storage-form" class="form">
+            <label>সার্ভিস
+              <select name="provider">
+                <option value="r2">Cloudflare R2 (১০ GB ফ্রি)</option>
+                <option value="s3">Amazon S3</option>
+                <option value="b2">Backblaze B2 (১০ GB ফ্রি)</option>
+                <option value="minio">MinIO / নিজের সার্ভার</option>
+              </select>
+            </label>
+            <label>Endpoint <span class="muted">(খালি রাখলে উপরের সার্ভিস অনুযায়ী বসবে)</span>
+              <input name="endpoint" placeholder="https://xxxx.r2.cloudflarestorage.com" />
+            </label>
+            <div class="row">
+              <label>Region<input name="region" placeholder="auto" /></label>
+              <label>Bucket<input name="bucket" placeholder="takamatch-backup" /></label>
+            </div>
+            <label>Access Key ID<input name="access_key_id" autocomplete="off" /></label>
+            <label>Secret Key <span class="muted">(সংরক্ষিত থাকলে খালি রাখুন)</span>
+              <input name="secret_access_key" type="password" autocomplete="new-password" placeholder="••••••••" />
+            </label>
+            <div class="row">
+              <label>স্বয়ংক্রিয় ব্যাকআপ (মিনিট)<input name="interval_minutes" inputmode="numeric" placeholder="0 = বন্ধ" /></label>
+              <label>কতটি রাখবেন<input name="keep" inputmode="numeric" placeholder="7" /></label>
+            </div>
+            <span class="btn-row">
+              <button class="btn ghost" type="button" id="storage-test">সংযোগ পরীক্ষা</button>
+              <button class="btn primary" type="submit">সংরক্ষণ করুন</button>
+            </span>
+          </form>
+          <p id="storage-status" class="muted small-text"></p>
+        </div>
+
+        <div class="panel">
+          <h3>ব্যাকআপ তালিকা</h3>
+          <p class="muted small-text">প্রতিটি ব্যাকআপ AES-256-GCM দিয়ে এনক্রিপ্ট করা — বাকেটে কেউ ঢুকলেও পড়তে পারবে না।</p>
+          <div id="backup-list" class="device-list"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

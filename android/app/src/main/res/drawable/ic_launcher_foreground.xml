@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- অ্যাডাপ্টিভ আইকনের ফোরগ্রাউন্ড: মিন্ট রঙের কয়েনে টিক চিহ্ন -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#2EE6A8"
+        android:pathData="M54,32 a22,22 0 1,0 0.01,0 z" />
+
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M44,54 L51,61 L65,46"
+        android:strokeColor="#04211A"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>
