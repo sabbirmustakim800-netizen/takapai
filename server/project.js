@@ -36,6 +36,11 @@ function publicBase(req) {
   return `${req.protocol}://${req.get('host')}`;
 }
 
+/** API সবসময় এই সার্ভারের নিজের ঠিকানাতেই থাকে (static site API সার্ভ করতে পারে না)। */
+function apiHostBase(req) {
+  return `${req.protocol}://${req.get('host')}`;
+}
+
 function ensureApiSecret(merchant) {
   if (merchant.api_secret) return merchant.api_secret;
   const secret = `tkp_${newToken(24)}`;
@@ -47,7 +52,7 @@ export function projectView(merchant, req) {
   const host = publicBase(req);
   const slug = merchant.project_slug;
   const apiSecret = merchant.api_secret;
-  const apiBase = apiSecret ? `${host}/api/${apiSecret}` : null;
+  const apiBase = apiSecret ? `${apiHostBase(req)}/api/${apiSecret}` : null;
   return {
     project_name: slug,
     username: merchant.username,
@@ -187,8 +192,8 @@ export function projectDashboardData(req, res) {
       pairing_key: pairing ? pairing.code : null,
       pairing_expires_at: pairing ? pairing.expires_at : null,
       api_key: fresh.api_secret,
-      api_url: `${host}/api/${fresh.api_secret}`,
-      api_example: `${host}/api/${fresh.api_secret}/orders`,
+      api_url: `${apiHostBase(req)}/api/${fresh.api_secret}`,
+      api_example: `${apiHostBase(req)}/api/${fresh.api_secret}/orders`,
     },
     devices,
     events,
@@ -223,7 +228,7 @@ function orderViewRow(row) {
 
 export function mountProjectApi(app, apiLimiter) {
   const infoHandler = (req, res) => {
-    const host = publicBase(req);
+    const host = apiHostBase(req);
     res.json({ ok: true, project: req.merchant.project_slug, api_base: `${host}/api/${req.params.secret}`, endpoints: { orders: `${host}/api/${req.params.secret}/orders`, events: `${host}/api/${req.params.secret}/events` } });
   };
 
