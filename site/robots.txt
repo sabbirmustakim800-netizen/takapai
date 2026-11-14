@@ -1,4 +1,7 @@
+# পাবলিক গাইড পাতা ইনডেক্স হতে পারে, কিন্তু ড্যাশবোর্ড/ক্রেডেনশিয়াল কখনো নয়
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /api/
 
 Sitemap: https://takapai.onrender.com/sitemap.xml

@@ -3,7 +3,8 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-import { q, audit, startFirebasePersistence, flushFirebasePersist, firebasePersistenceEnabled } from './db.js';
+import { q, audit, startFirebasePersistence, flushFirebasePersist } from './db.js';
+import { storageMode } from './firebase.js';
 import {
   HttpError,
   nowIso,
@@ -83,6 +84,7 @@ app.use('/api', (req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'content-type,authorization,x-device-id,x-device-key');
   res.setHeader('Access-Control-Max-Age', '600');
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method === 'OPTIONS') return res.status(204).end();
   next();
 });
@@ -209,7 +211,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
     service: 'taka-match',
-    storage: firebasePersistenceEnabled() ? 'firebase' : 'local-sqlite',
+    storage: storageMode(),
     time: nowIso(),
   });
 });

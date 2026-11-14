@@ -1,8 +1,13 @@
 # টাকা<span>ম্যাচ</span> (TakaMatch) — bKash / Rocket / Nagad পেমেন্ট ভেরিফিকেশন
 
-> 💾 **ডাটাবেস:** ডিফল্টে নিজের মেশিনের SQLite (`data/app.db`)। চাইলে ড্যাশবোর্ড → **ব্যাকআপ** থেকে নিজের R2/S3/B2/MinIO বাকেট যোগ করে এনক্রিপ্টেড ব্যাকআপ ও এক-ক্লিকে রিস্টোর করা যায়।
+> 🚀 **লাইভ সাইট:** https://takapai.onrender.com — *Setup Your Server*, প্রোজেক্ট ড্যাশবোর্ড, পেয়ারিং কী ও API।
+> **API সার্ভার:** https://takapai-api.onrender.com · **প্রোজেক্ট ড্যাশবোর্ড:** `https://takapai.onrender.com/dashboard/server/<project_name>`
 
-> 🌐 **সাইট:** https://site-b5937f6077b54a7295ad12475d346532.freebuff.page
+> 💾 **ডাটাবেস:** ডিফল্টে SQLite (`data/app.db`)। `FIREBASE_*` কনফিগ থাকলে **Firebase (Firestore) ডিফল্ট স্থায়ী স্টোরেজ** —
+> সার্ভার রিস্টার্ট/রিডিপ্লয়েও প্রোজেক্ট, ডিভাইস ও অর্ডার টিকে থাকে (নিচে *Firebase স্টোরেজ* দেখুন)।
+> চাইলে ড্যাশবোর্ড → **ব্যাকআপ** থেকে নিজের R2/S3/B2/MinIO বাকেটও যোগ করা যায়।
+
+> 🌐 **পুরোনো স্ট্যাটিক কপি:** https://site-b5937f6077b54a7295ad12475d346532.freebuff.page
 > — গাইড, APK ডাউনলোড ও ইন্টিগ্রেশন কোড। সোর্স: `site/` + `worker.js` + `deploy.json`।
 
 একটি সম্পূর্ণ সিস্টেম যা ফোনে আসা **বিকাশ (16247)**, **রকেট (16216)** ও **নগদ (16167)**
@@ -38,6 +43,81 @@ npm start            # http://localhost:3000
 npm test                              # ২৮টি ইউনিট/ইন্টিগ্রেশন টেস্ট
 node scripts/smoke.mjs http://127.0.0.1:3000   # ২৮টি এন্ড-টু-এন্ড চেক
 ```
+
+---
+
+## Setup Your Server (প্রোজেক্ট অ্যাকাউন্ট)
+
+নিজের প্রোজেক্টের জন্য আলাদা অ্যাকাউন্ট — কোনো ডেভেলপারের হাত লাগে না:
+
+1. https://takapai.onrender.com/#setup-server → **প্রোজেক্ট নাম + ইউজারনেম + পাসওয়ার্ড** দিয়ে রেজিস্ট্রেশন/লগইন।
+   (একই প্রোজেক্ট নামে একাধিক ইউজার রাখা যায় — যেমন `myshop` / `owner`, `myshop` / `accountant`)
+2. লগইনের পরে তিনটি জিনিস পান:
+
+| কী | কোথায় কাজে লাগে |
+|---|---|
+| **Server address** — `https://takapai.onrender.com/dashboard/server/<project_name>` | ডিভাইস থেকে আসা মেসেজ রিকুয়েস্ট, অর্ডার ও ইভেন্ট দেখার লাইভ ড্যাশবোর্ড |
+| **Pairing key** — ৮ অক্ষর, ২৪ ঘণ্টা (`/api/devices/pair`) | Android অ্যাপে বসিয়ে ফোনকে প্রোজেক্টের সাথে জোড়া দেওয়া |
+| **API** — `https://takapai-api.onrender.com/api/tkp_<secret>` | নিজের ওয়েবসাইট/অ্যাপে পেমেন্ট ভেরিফিকেশন |
+
+নিজের সাইটে ব্যবহার:
+
+```js
+// অর্ডার তৈরি → গ্রাহক টাকা পাঠাবে → ম্যাচ হলে status "matched"
+const res = await fetch('https://takapai-api.onrender.com/api/tkp_<secret>/orders', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ provider: 'bkash', amount: '১০০', sender: '01712345678', reference: 'ORDER-1' }),
+});
+const { order } = await res.json();          // order.id দিয়ে স্ট্যাটাস চেক করুন
+
+const s = await fetch(`https://takapai-api.onrender.com/api/tkp_<secret>/orders/${order.id}`);
+```
+
+`api_secret` শুধু লগইন করা অবস্থায় দেখা যায়, প্রতিটি প্রোজেক্টের জন্য আলাদা, আর যেকোনো সময় নতুন করে তৈরি করা যায়।
+টোকেন/সিক্রেট কোনো ফাইলে বা রিপোতে রাখা হয় না — হোস্টিংয়ের Environment/Secrets-এ রাখুন (`.env.example`-এ শুধু নাম)।
+
+---
+
+## Firebase স্টোরেজ (ডিফল্ট স্থায়ী স্টোরেজ)
+
+Render-এর ফ্রি ইনস্ট্যান্সে ডিস্ক থাকে না — তাই `FIREBASE_*` কনফিগ থাকলে SQLite স্ন্যাপশট Firebase-এ রাখা হয়:
+
+* বুটে Firestore থেকে স্ন্যাপশট নামিয়ে `data/app.db` তৈরি হয় (`VACUUM INTO` স্ন্যাপশট, WAL/SHM ফাইল ছাড়া),
+* প্রতিটি লেখার পরে ৩ সেকেন্ড ডিবাউন্সে আপলোড, প্রতি ৬০ সেকেন্ডে ব্যাকআপ আপলোড,
+* `SIGTERM`/`SIGINT`-এ ফ্লাশ — Render রিডিপ্লয়ের আগে শেষ ডেটাও সেভ হয়,
+* Firestore পাথে: `takamatch_db/snapshot` (মেটা) + `takamatch_db/snapshot/parts/p0000…` (৪৮০ KB টুকরা)।
+
+```bash
+# নামগুলো .env.example-এ আছে; মান কখনো কমিট করবেন না
+FIREBASE_API_KEY=
+FIREBASE_AUTH_DOMAIN=
+FIREBASE_PROJECT_ID=
+FIREBASE_STORAGE_BUCKET=
+FIREBASE_MESSAGING_SENDER_ID=
+FIREBASE_APP_ID=
+FIREBASE_MEASUREMENT_ID=
+```
+
+সার্ভারে ডেটা লেখার দুটি উপায় — `GET /api/health`-এর `storage` ফিল্ডে দেখা যায় কোনটি চলছে:
+
+| `storage` | কীভাবে | Firestore rules |
+|---|---|---|
+| `firebase-admin` | `FIREBASE_SERVICE_ACCOUNT` (service-account JSON) দিলে Admin SDK | সব বন্ধ রাখা যায় — `allow read, write: if false;` |
+| `firebase-client` | শুধু ওয়েব কনফিগ | লিখতে হলে rules খোলা লাগে (**শুধু ডেমো/পরীক্ষার জন্য**) |
+| `local-sqlite` | Firebase কনফিগ নেই | — |
+
+`FIREBASE_SERVICE_ACCOUNT` দেওয়াই নিরাপদ পথ:
+
+```json
+{ "type": "service_account", "project_id": "…", "client_email": "…", "private_key": "-----BEGIN PRIVATE KEY-----…" }
+```
+
+Firebase Console → Project settings → Service accounts → *Generate new private key* থেকে পুরো JSON-টা
+হোস্টিংয়ের Environment-এ এক লাইনে বসান। rules বন্ধ রাখলেও সার্ভার তখনও পড়তে/লিখতে পারবে, আর
+ব্রাউজার থেকে কেউ আপনার ডেটাবেস স্ন্যাপশট পড়তে পারবে না।
+
+পরীক্ষায় বা লোকাল ডেভেলে Firebase পুরোপুরি বন্ধ করতে: `DISABLE_FIREBASE=1` (টেস্ট নিজেই `NODE_ENV=test` ব্যবহার করে)।
 
 ---
 
@@ -178,6 +258,14 @@ if (!crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(req.headers['x-si
 রেট লিমিট, CSP ও নিরাপত্তা হেডার, সব কোয়েরিতে `merchant_id` দিয়ে আইসোলেশন,
 HMAC webhook, র্যাপার/সার্ভার-সাইডে এক-বার নিশ্চয়তা।
 
+**কী পাবলিক আর কী নয় (লাইভ সাইট):**
+
+* পাবলিক: গাইড, API ডকুমেন্টেশন, রেজিস্ট্রেশন/লগইন ফর্ম, `robots.txt` ও `sitemap.xml`।
+* **লগইন ছাড়া কেউ দেখতে পারে না:** server address, pairing key, `api_secret`, ডিভাইসের মেসেজ, অর্ডার।
+  ড্যাশবোর্ড পেজ লগইন ফর্ম ছাড়া কিছু রেন্ডার করে না (`/dashboard/` ও `/api/` `robots.txt`-এ ব্লকড, পেজে `noindex`)।
+* `/api/*` রেসপন্সে `Cache-Control: no-store` — টোকেন/কী কোনো ক্যাশে বা প্রক্সিতে থাকে না।
+* কোনো সিক্রেট কোডে, রিপোতে বা README-তে নেই — শুধু Environment/Secrets-এ (`.env.example`-এ শুধু নাম)।
+
 **মনে রাখুন:**
 
 * **HTTPS বাধ্যতামূলক** — প্রোডাকশনে রিভার্স প্রক্সি (nginx/Caddy) দিয়ে TLS দিন, নাহলে ডিভাইস কী প্লেইনটেক্সটে যায়।
@@ -198,4 +286,5 @@ HMAC webhook, র্যাপার/সার্ভার-সাইডে এক
 ## কনফিগারেশন
 
 `.env.example` দেখুন — `PORT`, `DATABASE_FILE`, `DEFAULT_ORDER_TTL_SECONDS`,
-`DEFAULT_MATCH_WINDOW_BEFORE_SECONDS`, `SESSION_TTL_SECONDS`।
+`DEFAULT_MATCH_WINDOW_BEFORE_SECONDS`, `SESSION_TTL_SECONDS`, `FIREBASE_*` (উপরে দেখুন),
+`FIREBASE_SERVICE_ACCOUNT` (ঐচ্ছিক, নিরাপদ পথ), `DISABLE_FIREBASE=1` (Firebase বন্ধ)।

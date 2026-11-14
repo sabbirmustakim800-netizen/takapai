@@ -14,6 +14,8 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import { getFirestore, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { initializeApp as initAdminApp, getApps as getAdminApps, cert } from 'firebase-admin/app';
+import { getFirestore as getAdminFirestore } from 'firebase-admin/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -29,6 +31,40 @@ export function firebaseConfigured() {
   if (process.env.DISABLE_FIREBASE === '1') return false;
   if (process.env.NODE_ENV === 'test') return false;
   return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId);
+}
+
+/** service-account থাকলে Admin SDK — তখন Firestore rules বন্ধ রাখা যায়, ক্লায়েন্ট সরাসরি কিছু পড়তে পারে না */
+export function serviceAccount() {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT || process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '';
+  if (!raw.trim()) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.project_id && parsed.private_key) return parsed;
+  } catch {
+    console.error('[firebase] FIREBASE_SERVICE_ACCOUNT সঠিক JSON নয়');
+  }
+  return null;
+}
+
+export function adminConfigured() {
+  return Boolean(serviceAccount());
+}
+
+let adminDb = null;
+
+function getAdminDb() {
+  const creds = serviceAccount();
+  if (!creds) return null;
+  if (adminDb) return adminDb;
+  const adminApp = getAdminApps().length ? getAdminApps()[0] : initAdminApp({ credential: cert(creds) });
+  adminDb = getAdminFirestore(adminApp);
+  return adminDb;
+}
+
+/** কোন ক্লায়েন্ট দিয়ে স্টোরেজ চলছে — health/ডায়াগনস্টিকসে দেখানোর জন্য */
+export function storageMode() {
+  if (!firebaseConfigured()) return 'local-sqlite';
+  return adminConfigured() ? 'firebase-admin' : 'firebase-client';
 }
 
 let app = null;
@@ -83,6 +119,27 @@ const partRef = (index) => doc(getFirebaseFirestore(), META_COLLECTION, META_DOC
 export async function downloadDatabaseSnapshot() {
   if (!firebaseConfigured()) return null;
 
+  const admin = getAdminDb();
+  if (admin) {
+    try {
+      const metaSnap = await admin.doc(`${META_COLLECTION}/${META_DOC}`).get();
+      if (!metaSnap.exists) return null;
+      const meta = metaSnap.data() || {};
+      const parts = Math.max(0, Number(meta.parts) || 0);
+      if (!parts || Number(meta.bytes) > MAX_TOTAL_BYTES) return null;
+      const pieces = [];
+      for (let i = 0; i < parts; i += 1) {
+        const part = await admin.doc(`${META_COLLECTION}/${META_DOC}/${PART_COLLECTION}/p${String(i).padStart(4, '0')}`).get();
+        if (!part.exists) return null;
+        pieces.push(String(part.data().data || ''));
+      }
+      return Buffer.from(pieces.join(''), 'base64');
+    } catch (err) {
+      console.error('[firebase] (admin) স্ন্যাপশট পড়া যায়নি:', err?.message || err);
+      return null;
+    }
+  }
+
   let metaSnap;
   try {
     metaSnap = await getDoc(metaRef());
@@ -120,6 +177,30 @@ export async function uploadDatabaseSnapshot(buffer) {
   if (buffer.length > MAX_TOTAL_BYTES) {
     console.error('[firebase] স্ন্যাপশট ২৪ MB ছাড়িয়ে গেছে — আপলোড বাদ');
     return false;
+  }
+
+  const admin = getAdminDb();
+  if (admin) {
+    const base64 = buffer.toString('base64');
+    const chunks = [];
+    for (let i = 0; i < base64.length; i += CHUNK_CHARS) chunks.push(base64.slice(i, i + CHUNK_CHARS));
+    const previous = await admin.doc(`${META_COLLECTION}/${META_DOC}`).get()
+      .then((s) => (s.exists ? Number(s.data().parts) || 0 : 0)).catch(() => 0);
+    const batch = admin.batch();
+    chunks.forEach((data, i) => {
+      batch.set(admin.doc(`${META_COLLECTION}/${META_DOC}/${PART_COLLECTION}/p${String(i).padStart(4, '0')}`), { data, index: i });
+    });
+    batch.set(admin.doc(`${META_COLLECTION}/${META_DOC}`), {
+      parts: chunks.length,
+      bytes: buffer.length,
+      updated_at: new Date().toISOString(),
+      engine: 'sqlite',
+    });
+    await batch.commit();
+    for (let i = chunks.length; i < previous; i += 1) {
+      await admin.doc(`${META_COLLECTION}/${META_DOC}/${PART_COLLECTION}/p${String(i).padStart(4, '0')}`).delete().catch(() => {});
+    }
+    return true;
   }
 
   const base64 = buffer.toString('base64');
